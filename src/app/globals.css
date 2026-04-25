@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Baseline resets & type rhythm. */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Respect reduced motion preference globally (per spec §8.4). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Components implementing the spec's heading pattern: a small Orbitron
+ * eyebrow sitting above a larger Sancreek display heading.
+ * (Spec §8.2.)
+ */
+@layer components {
+  .eyebrow {
+    @apply font-eyebrow text-xs font-medium uppercase tracking-[0.2em] text-neutral-600 dark:text-neutral-400;
+  }
+
+  .display-heading {
+    @apply font-display text-5xl leading-none tracking-tight sm:text-6xl md:text-7xl;
+  }
+}
