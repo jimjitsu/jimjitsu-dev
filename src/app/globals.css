@@ -2,8 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Baseline resets & type rhythm. */
+/* ----------------------------------------------------------------------------
+ * Strike Lane palette (spec §8.3).
+ * Values are unprefixed RGB triples so Tailwind can compose them with
+ * <alpha-value> in arbitrary opacities.
+ * --------------------------------------------------------------------------*/
 @layer base {
+  :root {
+    --color-base: 245 239 224;        /* #F5EFE0  warm bone — page background */
+    --color-surface: 234 226 208;     /* #EAE2D0  slightly darker bone — alt section bg */
+    --color-ink: 26 26 26;            /* #1A1A1A  near-black */
+    --color-ink-muted: 74 74 74;      /* #4A4A4A  softer ink for body */
+    --color-teal: 14 124 123;         /* #0E7C7B  deep retro turquoise */
+    --color-amber: 232 153 35;        /* #E89923  bowling-pin mustard */
+    --color-red: 200 57 47;           /* #C8392F  warm stripe red */
+    --color-pink: 255 111 168;        /* #FF6FA8  neon-sign pink, sparingly */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-base: 21 17 13;         /* #15110D  stained alley floor */
+      --color-surface: 31 26 20;      /* #1F1A14  slightly lifted alt bg */
+      --color-ink: 245 239 224;       /* #F5EFE0  bone, inverted */
+      --color-ink-muted: 184 176 160; /* #B8B0A0 */
+      --color-teal: 63 181 179;       /* #3FB5B3  lifted */
+      --color-amber: 255 200 87;      /* #FFC857 */
+      --color-red: 229 91 71;         /* #E55B47 */
+      --color-pink: 255 143 190;      /* #FF8FBE */
+    }
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
   }
@@ -19,18 +47,40 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* Selection — uses the amber accent at low alpha. */
+  ::selection {
+    background-color: rgb(var(--color-amber) / 0.4);
+    color: rgb(var(--color-ink));
+  }
 }
 
-/* Components implementing the spec's heading pattern: a small Orbitron
- * eyebrow sitting above a larger Sancreek display heading.
- * (Spec §8.2.)
- */
+/* ----------------------------------------------------------------------------
+ * Heading pattern: a small Orbitron eyebrow above a larger Sancreek display
+ * heading. (Spec §8.2.)
+ * --------------------------------------------------------------------------*/
 @layer components {
+  /* Eyebrow / pre-heading — sentence case, slightly larger than before. */
   .eyebrow {
-    @apply font-eyebrow text-xs font-medium uppercase tracking-[0.2em] text-neutral-600 dark:text-neutral-400;
+    @apply font-eyebrow text-sm font-medium tracking-[0.04em] text-ink-muted;
+  }
+
+  /* Smaller eyebrow variant — for tags, dates, and metadata. */
+  .eyebrow-sm {
+    @apply font-eyebrow text-xs font-medium tracking-[0.04em] text-ink-muted;
   }
 
   .display-heading {
-    @apply font-display text-5xl leading-none tracking-tight sm:text-6xl md:text-7xl;
+    @apply font-display text-5xl leading-none tracking-tight text-ink sm:text-6xl md:text-7xl;
+  }
+
+  /* Brutalist primary button — red bg, ink border. */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 border-2 border-ink bg-red px-5 py-3 font-eyebrow text-sm font-bold tracking-[0.04em] text-base transition hover:-translate-y-0.5 hover:bg-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-base;
+  }
+
+  /* Secondary button — outlined, ink on base. */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 border-2 border-ink bg-transparent px-5 py-3 font-eyebrow text-sm font-bold tracking-[0.04em] text-ink transition hover:-translate-y-0.5 hover:bg-ink hover:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-base;
   }
 }

@@ -30,7 +30,7 @@ export async function MarkdownContent({ source, className }: MarkdownContentProp
     <div
       className={
         className ??
-        "prose prose-neutral max-w-none font-mono dark:prose-invert prose-headings:font-display prose-headings:tracking-tight prose-pre:my-6 prose-pre:overflow-x-auto prose-pre:rounded-none prose-pre:border-2 prose-pre:border-neutral-900 dark:prose-pre:border-neutral-100"
+        "prose prose-neutral max-w-none font-mono text-ink dark:prose-invert prose-headings:font-display prose-headings:tracking-tight prose-headings:text-ink prose-a:text-ink prose-a:decoration-amber prose-a:decoration-2 prose-a:underline-offset-4 prose-strong:text-ink prose-pre:my-6 prose-pre:overflow-x-auto prose-pre:rounded-none prose-pre:border-2 prose-pre:border-ink"
       }
       dangerouslySetInnerHTML={{ __html: String(file) }}
     />

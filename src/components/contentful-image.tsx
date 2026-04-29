@@ -14,6 +14,7 @@ type ContentfulImageProps = Omit<ImageProps, "src" | "width" | "height" | "alt">
 /**
  * Render a Contentful Asset using next/image. Handles the protocol-less URL
  * Contentful returns and pulls width/height from the asset's image metadata.
+ * Supports fill mode — pass fill={true} and omit width/height.
  */
 export function ContentfulImage({ asset, alt, width, height, ...rest }: ContentfulImageProps) {
   if (!asset?.fields?.file) return null;
@@ -22,6 +23,14 @@ export function ContentfulImage({ asset, alt, width, height, ...rest }: Contentf
   const rawUrl = typeof file.url === "string" ? file.url : "";
   const url = rawUrl.startsWith("//") ? `https:${rawUrl}` : rawUrl;
 
+  if (!url) return null;
+
+  const finalAlt = alt ?? asset.fields.description ?? asset.fields.title ?? "";
+
+  if ("fill" in rest) {
+    return <Image src={url} alt={finalAlt} {...rest} />;
+  }
+
   const imageDetails =
     file.details && "image" in file.details && file.details.image
       ? file.details.image
@@ -29,9 +38,6 @@ export function ContentfulImage({ asset, alt, width, height, ...rest }: Contentf
 
   const finalWidth = width ?? imageDetails?.width ?? 1200;
   const finalHeight = height ?? imageDetails?.height ?? 800;
-  const finalAlt = alt ?? asset.fields.description ?? asset.fields.title ?? "";
-
-  if (!url) return null;
 
   return <Image src={url} alt={finalAlt} width={finalWidth} height={finalHeight} {...rest} />;
 }

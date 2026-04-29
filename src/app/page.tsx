@@ -1,59 +1,116 @@
 import Link from "next/link";
-import { contentful, type ProjectSkeleton } from "@/lib/contentful";
-import { getAllBlogPosts } from "@/lib/contentful";
+import { contentful, getAllBlogPosts, type AuthorSkeleton, type ProjectSkeleton } from "@/lib/contentful";
+import { CONTACT_EMAIL } from "@/lib/constants";
 import { ProjectCard } from "@/components/project-card";
 import { BlogPostCard } from "@/components/blog-post-card";
+import {
+  BowlingBallIcon,
+  BowlingPinIcon,
+  LaneArrowIcon,
+  StarburstIcon,
+  StrikeIcon,
+} from "@/components/icons";
+
+export const revalidate = 60;
+
+const SKILL_GROUPS = [
+  { label: "Languages", items: ["HTML", "CSS", "JavaScript", "TypeScript"] },
+  { label: "Frameworks", items: ["React", "Next.js", "Vue", "Svelte", "jQuery"] },
+  { label: "Styling", items: ["Tailwind CSS", "Bootstrap", "Foundation"] },
+  { label: "Tooling", items: ["Webpack", "Node.js", "npm", "Grunt", "Gulp", "GSAP", "Git"] },
+  { label: "CMS", items: ["Contentful", "Kentico", "Sitecore"] },
+  { label: "AI", items: ["Claude Code", "Cursor", "GitHub Copilot"] },
+] as const;
 
 /**
  * Home page.
- * Section structure mirrors spec §6.2. Featured projects and recent writing
- * pull from Contentful; the rest stay hardcoded until design mockups land.
+ * Each section is full-bleed so it can carry its own background color.
+ * Inner content centers via mx-auto + max-w-* (spec §6.2).
  */
 export default async function HomePage() {
-  const [{ items: featuredProjects }, { items: recentPosts }] = await Promise.all([
-    contentful.getEntries<ProjectSkeleton>({
-      content_type: "project",
-      "fields.featured": true,
-      order: ["fields.order", "-fields.publishDate"],
-      limit: 4,
-    }),
-    getAllBlogPosts().then((res) => ({ items: res.items.slice(0, 3) })),
-  ]);
+  const [{ items: featuredProjects }, { items: recentPosts }, { items: authors }] =
+    await Promise.all([
+      contentful.getEntries<ProjectSkeleton>({
+        content_type: "project",
+        "fields.featured": true,
+        order: ["fields.order", "-fields.publishDate"],
+        limit: 4,
+      }),
+      getAllBlogPosts().then((res) => ({ items: res.items.slice(0, 3) })),
+      contentful.getEntries<AuthorSkeleton>({ content_type: "author", limit: 1 }),
+    ]);
+
+  // Use the first paragraph of the author bio as the home snapshot blurb.
+  const bioSnippet = authors[0]?.fields.bio?.split(/\n\n/)[0] ?? null;
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-5xl flex-col gap-24 px-6 py-16 sm:px-10">
-      <HeroSection />
-      <AboutSnapshotSection />
-      <FeaturedProjectsSection projects={featuredProjects} />
-      <RecentWritingSection posts={recentPosts} />
-      <SkillsSection />
-      <ContactSection />
+    <main>
+      <Section bg="base">
+        <HeroSection />
+      </Section>
+
+      <Section bg="surface">
+        <AboutSnapshotSection bio={bioSnippet} />
+      </Section>
+
+      <Section bg="base">
+        <FeaturedProjectsSection projects={featuredProjects} />
+      </Section>
+
+      <Section bg="base">
+        <RecentWritingSection posts={recentPosts} />
+      </Section>
+
+      <Section bg="surface">
+        <SkillsSection />
+      </Section>
+
+      <Section bg="base">
+        <ContactSection />
+      </Section>
     </main>
+  );
+}
+
+/**
+ * Full-bleed section wrapper. Lets each home-page section carry its own
+ * background while keeping content boxed by an inner max-width container.
+ */
+function Section({ children, bg }: { children: React.ReactNode; bg: "base" | "surface" }) {
+  const bgClass = bg === "surface" ? "bg-surface" : "bg-base";
+  return (
+    <section className={`${bgClass} border-b-2 border-ink/10 last:border-b-0`}>
+      <div className="mx-auto max-w-4xl px-6 py-20 sm:px-10 sm:py-24">{children}</div>
+    </section>
   );
 }
 
 function HeroSection() {
   return (
-    <section aria-labelledby="hero-heading" className="flex flex-col gap-6">
-      <p className="eyebrow">Jim Tierney</p>
+    <section aria-labelledby="hero-heading" className="relative flex flex-col gap-6">
+      {/* Decorative starburst floats behind the heading at low opacity. */}
+      <StarburstIcon
+        aria-hidden="true"
+        size={320}
+        className="pointer-events-none absolute -right-10 -top-10 text-amber/20"
+      />
+      <p className="eyebrow flex items-center gap-2">
+        <BowlingPinIcon size={16} className="text-red" />
+        Jim Tierney
+      </p>
       <h1 id="hero-heading" className="display-heading">
-        Frontend engineer, design-system obsessive.
+        Frontend developer focusing on design systems.
       </h1>
-      <p className="max-w-2xl text-base leading-relaxed text-neutral-700 dark:text-neutral-300">
+      <p className="max-w-2xl text-base leading-relaxed text-ink-muted">
         I build fast, accessible, component-driven frontends — and the tooling that lets content
         teams go wild without breaking the brand.
       </p>
       <div className="flex flex-wrap gap-4">
-        <Link
-          href="/projects"
-          className="border-2 border-neutral-900 bg-neutral-900 px-5 py-3 text-sm font-bold uppercase tracking-wider text-neutral-50 transition hover:-translate-y-0.5 dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900"
-        >
+        <Link href="/projects" className="btn-primary">
           See projects
+          <LaneArrowIcon size={14} className="rotate-90" />
         </Link>
-        <Link
-          href="/blog"
-          className="border-2 border-neutral-900 px-5 py-3 text-sm font-bold uppercase tracking-wider text-neutral-900 transition hover:-translate-y-0.5 dark:border-neutral-100 dark:text-neutral-100"
-        >
+        <Link href="/blog" className="btn-secondary">
           Read the blog
         </Link>
       </div>
@@ -61,21 +118,31 @@ function HeroSection() {
   );
 }
 
-function AboutSnapshotSection() {
+function AboutSnapshotSection({ bio }: { bio: string | null }) {
   return (
     <section aria-labelledby="about-heading" className="flex flex-col gap-4">
-      <p className="eyebrow">About</p>
+      <p className="eyebrow flex items-center gap-2">
+        <BowlingBallIcon size={16} className="text-teal" />
+        About
+      </p>
       <h2 id="about-heading" className="display-heading">
         A bit about me.
       </h2>
-      <p className="max-w-2xl text-base leading-relaxed text-neutral-700 dark:text-neutral-300">
-        Lorem ipsum placeholder bio. Replace once the /about page copy is locked.
+      <p className="max-w-2xl text-base leading-relaxed text-ink-muted">
+        {bio ??
+          "Frontend engineer based in Milwaukee, WI. Over a decade building fast, accessible, component-driven UIs and the design systems that power them."}
       </p>
       <div className="flex flex-wrap gap-4 text-sm">
-        <Link href="/about" className="underline underline-offset-4">
+        <Link
+          href="/about"
+          className="text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
+        >
           More about me
         </Link>
-        <a href="/resume.pdf" className="underline underline-offset-4">
+        <a
+          href="/resume.pdf"
+          className="text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
+        >
           Download resume
         </a>
       </div>
@@ -92,20 +159,23 @@ function FeaturedProjectsSection({
     <section aria-labelledby="projects-heading" className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <p className="eyebrow">Selected Work</p>
+          <p className="eyebrow flex items-center gap-2">
+            <StrikeIcon size={16} className="text-red" />
+            Selected work
+          </p>
           <h2 id="projects-heading" className="display-heading">
             Featured projects.
           </h2>
         </div>
         <Link
           href="/projects"
-          className="font-eyebrow text-xs uppercase tracking-[0.2em] underline underline-offset-4"
+          className="font-eyebrow text-sm tracking-[0.04em] text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
         >
           All projects →
         </Link>
       </div>
       {projects.length === 0 ? (
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-ink-muted">
           Mark a few projects as <code>Featured</code> in Contentful to populate this section.
         </p>
       ) : (
@@ -130,20 +200,23 @@ function RecentWritingSection({
     <section aria-labelledby="writing-heading" className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <p className="eyebrow">From the Blog</p>
+          <p className="eyebrow flex items-center gap-2">
+            <BowlingPinIcon size={16} className="text-amber" />
+            From the blog
+          </p>
           <h2 id="writing-heading" className="display-heading">
             Recent writing.
           </h2>
         </div>
         <Link
           href="/blog"
-          className="font-eyebrow text-xs uppercase tracking-[0.2em] underline underline-offset-4"
+          className="font-eyebrow text-sm tracking-[0.04em] text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
         >
           All posts →
         </Link>
       </div>
       {posts.length === 0 ? (
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-ink-muted">
           No blog posts yet — publish one in Contentful and it&apos;ll show up here.
         </p>
       ) : (
@@ -161,14 +234,45 @@ function RecentWritingSection({
 
 function SkillsSection() {
   return (
-    <section aria-labelledby="skills-heading" className="flex flex-col gap-4">
-      <p className="eyebrow">Toolkit</p>
-      <h2 id="skills-heading" className="display-heading">
-        Skills &amp; tech.
-      </h2>
-      <p className="text-sm text-neutral-600 dark:text-neutral-400">
-        Placeholder — visual summary of core tech to come.
-      </p>
+    <section aria-labelledby="skills-heading" className="flex flex-col gap-8">
+      <div className="flex flex-col gap-2">
+        <p className="eyebrow flex items-center gap-2">
+          <StarburstIcon size={16} className="text-teal" />
+          Toolkit
+        </p>
+        <h2 id="skills-heading" className="display-heading">
+          Skills &amp; tech.
+        </h2>
+      </div>
+
+      <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {SKILL_GROUPS.map(({ label, items }) => (
+          <div key={label} className="flex flex-col gap-3 border-2 border-ink p-4">
+            <dt className="eyebrow-sm">{label}</dt>
+            <dd>
+              <ul className="flex flex-wrap gap-2">
+                {items.map((item) => (
+                  <li
+                    key={item}
+                    className="border border-ink px-2 py-0.5 font-eyebrow text-xs tracking-[0.04em] text-ink"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <ul className="grid gap-2 text-sm text-ink-muted sm:grid-cols-2">
+        <li>Design systems development and governance</li>
+        <li>Web performance optimization</li>
+        <li>Accessibility (WCAG 2.1 AA)</li>
+        <li>Agile / user story refinement</li>
+        <li>Cross-functional collaboration with UX and design</li>
+        <li>Freelance developer hiring and management</li>
+      </ul>
     </section>
   );
 }
@@ -176,13 +280,19 @@ function SkillsSection() {
 function ContactSection() {
   return (
     <section aria-labelledby="contact-heading" className="flex flex-col gap-4">
-      <p className="eyebrow">Get in touch</p>
+      <p className="eyebrow flex items-center gap-2">
+        <BowlingBallIcon size={16} className="text-red" />
+        Get in touch
+      </p>
       <h2 id="contact-heading" className="display-heading">
         Say hi.
       </h2>
-      <p className="text-base text-neutral-700 dark:text-neutral-300">
-        <a href="mailto:jimbo.c.tierney@gmail.com" className="underline underline-offset-4">
-          jimbo.c.tierney@gmail.com
+      <p className="text-base text-ink-muted">
+        <a
+          href={`mailto:${CONTACT_EMAIL}`}
+          className="text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
+        >
+          {CONTACT_EMAIL}
         </a>
       </p>
     </section>

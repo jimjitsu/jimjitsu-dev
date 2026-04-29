@@ -4,9 +4,19 @@ import Link from "next/link";
 import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
+import { LaneArrowIcon } from "@/components/icons";
+import { JsonLd } from "@/components/json-ld";
+import { SITE_URL } from "@/lib/constants";
+
+export const revalidate = 60;
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
+}
+
+function resolveContentfulUrl(url: string | undefined | null): string | undefined {
+  if (!url) return undefined;
+  return url.startsWith("//") ? `https:${url}` : url;
 }
 
 export async function generateStaticParams() {
@@ -18,9 +28,32 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
   if (!post) return {};
+
+  const { title, excerpt, coverImage, publishDate, canonicalUrl } = post.fields;
+
+  const ogImageUrl =
+    coverImage && "fields" in coverImage
+      ? resolveContentfulUrl(String(coverImage.fields.file?.url ?? ""))
+      : undefined;
+
   return {
-    title: post.fields.title,
-    description: post.fields.excerpt,
+    title,
+    description: excerpt,
+    ...(canonicalUrl && { alternates: { canonical: canonicalUrl } }),
+    openGraph: {
+      title,
+      description: excerpt,
+      type: "article",
+      publishedTime: publishDate,
+      url: `${SITE_URL}/blog/${slug}`,
+      ...(ogImageUrl && { images: [{ url: ogImageUrl }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: excerpt,
+      ...(ogImageUrl && { images: [ogImageUrl] }),
+    },
   };
 }
 
@@ -34,24 +67,51 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const authorName =
     author && "fields" in author ? (author.fields.name as string | undefined) : undefined;
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    datePublished: publishDate,
+    dateModified: post.sys.updatedAt,
+    url: `${SITE_URL}/blog/${slug}`,
+    author: {
+      "@type": "Person",
+      name: authorName ?? "Jim Tierney",
+      url: SITE_URL,
+    },
+    ...(excerpt && { description: excerpt }),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+      { "@type": "ListItem", position: 3, name: title, item: `${SITE_URL}/blog/${slug}` },
+    ],
+  };
+
   return (
-    <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-10 px-6 py-16 sm:px-10">
+    <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">
+      <JsonLd schema={articleSchema} />
+      <JsonLd schema={breadcrumbSchema} />
+
       <Link
         href="/blog"
-        className="font-eyebrow text-xs uppercase tracking-[0.2em] underline underline-offset-4"
+        className="inline-flex items-center gap-2 font-eyebrow text-sm tracking-[0.04em] text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
       >
-        ← All posts
+        <LaneArrowIcon size={14} className="-rotate-90" />
+        All posts
       </Link>
 
       <header className="flex flex-col gap-4">
         <p className="eyebrow">Post</p>
         <h1 className="display-heading">{title}</h1>
         {excerpt && (
-          <p className="max-w-2xl text-base leading-relaxed text-neutral-700 dark:text-neutral-300">
-            {excerpt}
-          </p>
+          <p className="max-w-2xl text-base leading-relaxed text-ink-muted">{excerpt}</p>
         )}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 font-eyebrow text-[10px] uppercase tracking-[0.2em] text-neutral-600 dark:text-neutral-400">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 font-eyebrow text-xs tracking-[0.04em] text-ink-muted">
           <time dateTime={publishDate}>
             {new Date(publishDate).toLocaleDateString("en-US", {
               year: "numeric",
@@ -65,7 +125,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </header>
 
       {coverImage && "fields" in coverImage && (
-        <div className="border-2 border-neutral-900 dark:border-neutral-100">
+        <div className="border-2 border-ink">
           <ContentfulImage asset={coverImage} alt={title} className="h-auto w-full" priority />
         </div>
       )}
@@ -73,13 +133,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <MarkdownContent source={body} />
 
       {canonicalUrl && (
-        <p className="border-t-2 border-neutral-900 pt-6 text-xs text-neutral-600 dark:border-neutral-100 dark:text-neutral-400">
+        <p className="border-t-2 border-ink pt-6 text-xs text-ink-muted">
           Originally published at{" "}
           <a
             href={canonicalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-4"
+            className="text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
           >
             {canonicalUrl}
           </a>

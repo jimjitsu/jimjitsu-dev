@@ -55,6 +55,15 @@ The site will be a multi-page React/Next.js application, with long-form content 
 
 ## 6. Site Architecture
 
+### 6.0 Chrome layout
+
+A persistent **sidebar** carries all primary navigation (no top header, no traditional footer):
+
+- **Desktop (`lg:` ≥1024px):** sidebar is fixed to the left, ~288px (`w-72`) wide, full height. Main content sits to its right (`lg:pl-72`).
+- **Mobile / tablet:** sidebar is hidden by default behind a hamburger button (top-right, fixed). Tapping reveals the sidebar as a slide-in drawer with a dimming backdrop. Tapping the backdrop or any nav link auto-closes it.
+- **Sidebar contents, top → bottom:** logo block (placeholder for now — bowling-pin glyph in a black brutalist square), name + short intro line, primary nav (home / projects / blog / about), spacer, then a bottom group with mailto, social links, and copyright.
+- **Implementation:** `Sidebar` is a server component fetching `SiteSettings`; `SidebarShell` is a client component holding open/close state, route-change auto-close, and body-scroll lock while open.
+
 ### 6.1 Page Map
 
 - `/` — Home
@@ -152,7 +161,7 @@ A mashup of **brutalist web design** and a **retro bowling alley** aesthetic.
 
 ### 8.2 Typography
 
-Heading pattern: a short pre-heading in Orbitron (small, uppercase, tracked out) sitting above a larger display heading in Sancreek.
+Heading pattern: a short Orbitron pre-heading in **sentence case** (`text-sm`, light tracking ~`0.04em`) sitting above a larger Sancreek display heading. We deliberately avoid uppercase eyebrows site-wide — they read better at the sizes used here in sentence case, and pair more comfortably with the brutalist + retro mix.
 
 | Role | Font | Source | Notes |
 |---|---|---|---|
@@ -162,9 +171,22 @@ Heading pattern: a short pre-heading in Orbitron (small, uppercase, tracked out)
 
 Loading: all fonts via `next/font` for self-hosting and zero layout shift.
 
-### 8.3 Color
+### 8.3 Color — "Strike Lane" palette
 
-Palette TBD, but the bowling-alley direction points toward a mid-century palette: cream/bone as a base, deep teal or turquoise, mustard/amber, warm red, with the option of neon pink or electric blue as an accent. Brutalism pushes us toward strong contrast and a small number of colors used with conviction.
+Mid-century bowling-alley interior: bone-and-ink base with warm-stripe accents.
+
+| Token | Light | Dark | Role |
+|---|---|---|---|
+| `base` | `#F5EFE0` warm bone | `#15110D` stained alley floor | Page background |
+| `surface` | `#EAE2D0` shifted bone | `#1F1A14` lifted alley | Alt section background; used to break up the home page (e.g. About on surface, hero on base) |
+| `ink` | `#1A1A1A` near-black | `#F5EFE0` bone, inverted | Primary text, borders, primary fills |
+| `ink-muted` | `#4A4A4A` | `#B8B0A0` | Secondary text |
+| `teal` | `#0E7C7B` | `#3FB5B3` | Accent — section dividers, blog stripe |
+| `amber` | `#E89923` | `#FFC857` | Accent — focus rings, link underlines, selection |
+| `red` | `#C8392F` | `#E55B47` | Accent — primary CTAs, project stripe |
+| `pink` | `#FF6FA8` | `#FF8FBE` | Used sparingly as a neon flourish |
+
+Implemented as CSS custom properties (`--color-*`) with the dark variant flipping inside a `prefers-color-scheme: dark` media query. Tailwind tokens (`bg-base`, `text-ink`, `border-teal`, etc.) compose them with `<alpha-value>` so opacities work everywhere.
 
 Light and dark themes, with system preference as default.
 
@@ -174,10 +196,17 @@ Subtle, intentional. Respect `prefers-reduced-motion`. Any bowling-themed motion
 
 ### 8.5 Iconography & Graphic Elements
 
-The retro bowling vibe comes through largely in graphics rather than typography or color alone. Options to explore in the design pass:
+Style: **flat vector with bold outlines** — screenprinted-bowling-sign feel, 2px strokes, rendered with `currentColor` so icons take on whatever text color sits on them. Plays with brutalism's love of heavy strokes; legible at small sizes; ships as inline SVG.
 
-- Pins, balls, lane arrows, starburst shapes, score-sheet symbols (X for strike, / for spare).
-- Style direction TBD: flat vector, screenprint/textured, hand-drawn, or atomic-age geometric.
+Library lives at `src/components/icons/`. Initial set:
+
+- `BowlingPinIcon` — the core motif; used as the wordmark accent and on About / Contact section eyebrows.
+- `BowlingBallIcon` — the secondary motif; bullet between footer social items.
+- `LaneArrowIcon` — the directional triangle from a bowling lane; section dividers and "back" links (`-rotate-90`).
+- `StrikeIcon` — the X mark from a score sheet; on the Selected Work eyebrow.
+- `StarburstIcon` — atomic-age decorative flourish; behind the home hero at low opacity.
+
+Add to the library as new motifs are needed; keep all icons at the 24×24 viewBox so sizing stays predictable.
 
 ### 8.6 Responsiveness & Accessibility
 
@@ -278,8 +307,6 @@ Both projects and posts will be stubbed with placeholders during the build so pa
 
 ## 15. Still to Discuss
 
-- **Color palette:** Defer to the mockup phase. Settle specific hex values for base, accent, and neutrals in both light and dark themes alongside the first mockups.
-- **Iconography style:** Flat vector vs. screenprint/textured vs. hand-drawn vs. atomic-age geometric. Settle alongside mockups.
 - Pick the third blog post topic.
 
 ## 16. Milestones — 1 to 2 Week MVP Plan

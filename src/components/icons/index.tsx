@@ -1,0 +1,89 @@
+import type { SVGProps } from "react";
+
+/**
+ * Flat-vector iconography — bold strokes, no fill, rendered with currentColor.
+ * Drop into headings/eyebrows/links wherever a small bowling-alley accent
+ * adds personality. Spec §8.5.
+ */
+
+type IconProps = SVGProps<SVGSVGElement> & { size?: number | string };
+
+function Icon({ size = 24, children, ...rest }: IconProps & { children: React.ReactNode }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...rest}
+    >
+      {children}
+    </svg>
+  );
+}
+
+/** A bowling pin — the core motif. */
+export function BowlingPinIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      {/* Pin silhouette */}
+      <path d="M12 2c-2.4 0-3.5 2.2-3.5 5 0 1.6.4 2.6.4 4 0 1.7-2 3-2 6.5C6.9 20.2 9.2 22 12 22s5.1-1.8 5.1-4.5c0-3.5-2-4.8-2-6.5 0-1.4.4-2.4.4-4 0-2.8-1.1-5-3.5-5z" />
+      {/* The two stripes near the neck */}
+      <path d="M9 7.5h6" />
+      <path d="M9.3 9.5h5.4" />
+    </Icon>
+  );
+}
+
+/** A bowling ball — circle with three finger holes. */
+export function BowlingBallIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="9" cy="9" r="0.6" fill="currentColor" />
+      <circle cx="13" cy="8" r="0.6" fill="currentColor" />
+      <circle cx="11.5" cy="11.5" r="0.6" fill="currentColor" />
+    </Icon>
+  );
+}
+
+/** A lane arrow — the directional triangle painted on bowling lanes. */
+export function LaneArrowIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 4 L20 18 L12 14 L4 18 Z" />
+    </Icon>
+  );
+}
+
+/** Strike — the X mark from a score sheet. */
+export function StrikeIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 5 L19 19" />
+      <path d="M19 5 L5 19" />
+    </Icon>
+  );
+}
+
+/** Atomic-age starburst — eight points, decorative flourish. */
+export function StarburstIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      {/* Four straight rays */}
+      <path d="M12 2 V22" />
+      <path d="M2 12 H22" />
+      {/* Four diagonals */}
+      <path d="M5 5 L19 19" />
+      <path d="M19 5 L5 19" />
+      {/* Center dot */}
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
