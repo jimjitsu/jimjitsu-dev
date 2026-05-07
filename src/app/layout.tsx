@@ -36,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={fontVariables}>
-      <body className="min-h-dvh bg-base font-mono text-ink antialiased">
+      <body className="min-h-dvh bg-base font-mono text-ink antialiased" suppressHydrationWarning>
         <SidebarShell>
           <Sidebar />
         </SidebarShell>

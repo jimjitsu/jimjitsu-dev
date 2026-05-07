@@ -18,7 +18,7 @@ const SKILL_GROUPS = [
   { label: "Frameworks", items: ["React", "Next.js", "Vue", "Svelte", "jQuery"] },
   { label: "Styling", items: ["Tailwind CSS", "Bootstrap", "Foundation"] },
   { label: "Tooling", items: ["Webpack", "Node.js", "npm", "Grunt", "Gulp", "GSAP", "Git"] },
-  { label: "CMS", items: ["Contentful", "Kentico", "Sitecore"] },
+  { label: "CMS", items: ["Contentful", "Kentico", "Sitecore", "Wordpress"] },
   { label: "AI", items: ["Claude Code", "Cursor", "GitHub Copilot"] },
 ] as const;
 
@@ -99,11 +99,10 @@ function HeroSection() {
         Jim Tierney
       </p>
       <h1 id="hero-heading" className="display-heading">
-        Frontend developer focusing on design systems.
+        Frontend developer
       </h1>
       <p className="max-w-2xl text-base leading-relaxed text-ink-muted">
-        I build fast, accessible, component-driven frontends — and the tooling that lets content
-        teams go wild without breaking the brand.
+        I specialize in component-driven frontends, design systems, responsive designed sites, and developing with a focus on web performance and accessibility. I like progressive enhancement, and mobile-first development.
       </p>
       <div className="flex flex-wrap gap-4">
         <Link href="/projects" className="btn-primary">
