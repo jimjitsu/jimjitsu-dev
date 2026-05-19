@@ -102,7 +102,7 @@ function HeroSection() {
         Frontend developer
       </h1>
       <p className="max-w-2xl text-base leading-relaxed text-ink-muted">
-        I specialize in component-driven frontends, design systems, responsive designed sites, and developing with a focus on web performance and accessibility. I like progressive enhancement, and mobile-first development.
+        I specialize in frontend development with an eye for detail and an understanding of creative concerns, design systems, responsive designed sites, and developing with a focus on web performance and accessibility. Progressive enhancement, incremental improvements, and mobile-first development are my jam, I enjoy hard problems, and love elegant solutions.
       </p>
       <div className="flex flex-wrap gap-4">
         <Link href="/projects" className="btn-primary">

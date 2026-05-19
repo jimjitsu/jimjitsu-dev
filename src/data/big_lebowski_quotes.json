@@ -1,0 +1,295 @@
+{
+  "movie": "The Big Lebowski",
+  "year": 1998,
+  "director": "Joel Coen",
+  "quotes_by_character": {
+    "The Dude (Jeffrey Lebowski)": [
+      {
+        "quote": "Yeah, well, you know, that's just, like, your opinion, man.",
+        "scene": "The Dude dismisses the Big Lebowski's diatribe in the millionaire's study."
+      },
+      {
+        "quote": "The Dude abides.",
+        "scene": "The Dude's parting words to The Stranger at the bowling alley near the film's end."
+      },
+      {
+        "quote": "This will not stand, ya know, this aggression will not stand, man.",
+        "scene": "The Dude paraphrases George H.W. Bush while complaining to the Big Lebowski about his ruined rug."
+      },
+      {
+        "quote": "Hey, careful, man, there's a beverage here!",
+        "scene": "The Dude protests when one of Treehorn's thugs grabs him in his apartment, spilling his White Russian."
+      },
+      {
+        "quote": "That rug really tied the room together.",
+        "scene": "The Dude lamenting his ruined rug to Walter and Donny at the bowling alley."
+      },
+      {
+        "quote": "I'm the Dude. So that's what you call me. You know, that or, uh, His Dudeness, or, uh, Duder, or El Duderino if you're not into the whole brevity thing.",
+        "scene": "The Dude introduces himself to the Big Lebowski in his mansion."
+      },
+      {
+        "quote": "New shit has come to light.",
+        "scene": "The Dude tries to explain the case to the Big Lebowski after Bunny's apparent kidnapping."
+      },
+      {
+        "quote": "You're not wrong, Walter. You're just an asshole.",
+        "scene": "The Dude responds to Walter's righteous tirade outside the bowling alley."
+      },
+      {
+        "quote": "Mind if I do a J?",
+        "scene": "The Dude lights up a joint while driving Maude's limo, to the chauffeur's annoyance."
+      },
+      {
+        "quote": "Just take it easy, man.",
+        "scene": "The Dude's frequent mantra throughout the film."
+      },
+      {
+        "quote": "I can't be worrying about that shit. Life goes on, man.",
+        "scene": "The Dude shrugging off concerns at the bowling alley."
+      },
+      {
+        "quote": "This is a very complicated case, Maude. You know, a lotta ins, a lotta outs, a lotta what-have-yous.",
+        "scene": "The Dude tries to update Maude on the kidnapping investigation."
+      },
+      {
+        "quote": "Calmer than you are.",
+        "scene": "The Dude responds to Walter's escalating outbursts during a bowling argument."
+      },
+      {
+        "quote": "Obviously, you're not a golfer.",
+        "scene": "The Dude observes the thugs trashing his apartment over a bowling ball."
+      },
+      {
+        "quote": "Let me explain something to you. Um, I am not 'Mr. Lebowski.' You're Mr. Lebowski. I'm the Dude.",
+        "scene": "The Dude clarifies his identity to the Big Lebowski's assistant Brandt and the millionaire."
+      },
+      {
+        "quote": "He fixes the cable?",
+        "scene": "The Dude reacts incredulously when Maude reveals what Knox Harrington does."
+      },
+      {
+        "quote": "Sometimes there's a man... I won't say a hero, 'cause, what's a hero?",
+        "scene": "The Stranger narrates the film's opening — though this is The Stranger about The Dude, often quoted as defining him."
+      }
+    ],
+    "Walter Sobchak": [
+      {
+        "quote": "Am I wrong?",
+        "scene": "Walter's repeated rhetorical question while arguing rules at the bowling alley."
+      },
+      {
+        "quote": "Has the whole world gone crazy? Am I the only one around here who gives a shit about the rules?",
+        "scene": "Walter loses it after Smokey crosses the foul line during league play."
+      },
+      {
+        "quote": "MARK IT ZERO!",
+        "scene": "Walter screams at Smokey to invalidate his score, gun drawn, in the bowling alley."
+      },
+      {
+        "quote": "Smokey, my friend, you are entering a world of pain.",
+        "scene": "Walter warns Smokey at the bowling alley over a contested foul line."
+      },
+      {
+        "quote": "This is not 'Nam. This is bowling. There are rules.",
+        "scene": "Walter explains the seriousness of bowling to Smokey."
+      },
+      {
+        "quote": "You're entering a world of pain.",
+        "scene": "Walter's frequent threat throughout the film."
+      },
+      {
+        "quote": "Forget it, Donny, you're out of your element!",
+        "scene": "Walter dismisses Donny's contributions during arguments at the bowling alley."
+      },
+      {
+        "quote": "Shut the fuck up, Donny!",
+        "scene": "Walter's recurring response whenever Donny tries to chime in."
+      },
+      {
+        "quote": "Saturday, Donny, is Shabbos, the Jewish day of rest. That means I don't work, I don't drive a car, I don't fucking ride in a car, I don't handle money, I don't turn on the oven, and I sure as shit don't fucking roll!",
+        "scene": "Walter explains why he can't bowl on Saturday, despite having converted for his ex-wife."
+      },
+      {
+        "quote": "Fuck it, Dude. Let's go bowling.",
+        "scene": "Walter's resolution after the case spirals into chaos near the end of the film."
+      },
+      {
+        "quote": "I'm staying. Finishing my coffee. Enjoying my coffee.",
+        "scene": "Walter refuses to leave the diner after being asked to lower his voice."
+      },
+      {
+        "quote": "Say what you want about the tenets of National Socialism, Dude, at least it's an ethos.",
+        "scene": "Walter contrasts the nihilists with Nazis after they confront the Dude."
+      },
+      {
+        "quote": "Nihilists! Fuck me. I mean, say what you like about the tenets of National Socialism, Dude, at least it's an ethos.",
+        "scene": "Walter rants about the German nihilists threatening the Dude."
+      },
+      {
+        "quote": "Eight-year-olds, Dude.",
+        "scene": "Walter explains his suspicion of the schoolboy Larry Sellers."
+      },
+      {
+        "quote": "Life does not stop and start at your convenience, you miserable piece of shit.",
+        "scene": "Walter berates Larry Sellers in his bedroom while attempting to recover the money."
+      },
+      {
+        "quote": "Do you see what happens, Larry? Do you see what happens when you fuck a stranger in the ass?",
+        "scene": "Walter destroys what he believes is Larry's new car with a crowbar."
+      },
+      {
+        "quote": "He's a good man. And thorough.",
+        "scene": "Walter describing the private detective Da Fino sarcastically."
+      }
+    ],
+    "Donny Kerabatsos": [
+      {
+        "quote": "I am the walrus.",
+        "scene": "Donny chimes in during a bowling alley conversation, having misheard the topic entirely."
+      },
+      {
+        "quote": "Phone's ringing, Dude.",
+        "scene": "Donny notices the phone ringing in the bowling alley."
+      },
+      {
+        "quote": "What's a pederast, Walter?",
+        "scene": "Donny innocently asks for clarification after Walter insults Jesus Quintana."
+      },
+      {
+        "quote": "Are these the Nazis, Walter?",
+        "scene": "Donny asks Walter about the menacing Germans following the Dude."
+      },
+      {
+        "quote": "I'm throwing rocks tonight!",
+        "scene": "Donny excited about bowling well during league play."
+      }
+    ],
+    "The Stranger": [
+      {
+        "quote": "Sometimes you eat the bear, and sometimes, well, he eats you.",
+        "scene": "The Stranger offers folksy wisdom to the Dude at the bowling alley bar."
+      },
+      {
+        "quote": "Take 'er easy, Dude. I know that you will.",
+        "scene": "The Stranger's farewell to the Dude near the end of the film."
+      },
+      {
+        "quote": "The Dude abides. I don't know about you, but I take comfort in that. It's good knowin' he's out there.",
+        "scene": "The Stranger's closing narration to the camera."
+      },
+      {
+        "quote": "Sir, I have to ask you to watch the language.",
+        "scene": "The Stranger gently chides the Dude for cursing at the bowling alley bar."
+      },
+      {
+        "quote": "Do you have to use so many cuss words?",
+        "scene": "The Stranger gently chides the Dude for cursing at the bowling alley bar."
+      }
+    ],
+    "Jesus Quintana": [
+      {
+        "quote": "Nobody fucks with the Jesus.",
+        "scene": "Jesus delivers his iconic warning to the Dude and Walter at the bowling alley."
+      },
+      {
+        "quote": "You said it, man. Nobody fucks with the Jesus.",
+        "scene": "Jesus reiterates his threat after polishing his bowling ball."
+      },
+      {
+        "quote": "You ready to be fucked, man?",
+        "scene": "Jesus taunts the Dude's team about their upcoming match."
+      },
+      {
+        "quote": "I see you rolled your way into the semis. Dios mio, man. Liam and me, we're gonna fuck you up.",
+        "scene": "Jesus confronts the Dude and Walter at the bowling alley."
+      }
+    ],
+    "Maude Lebowski": [
+      {
+        "quote": "The word itself makes some men uncomfortable. Vagina.",
+        "scene": "Maude lectures the Dude about feminist art in her loft studio."
+      },
+      {
+        "quote": "Does the female form make you uncomfortable, Mr. Lebowski?",
+        "scene": "Maude challenges the Dude while showing him her artwork."
+      },
+      {
+        "quote": "Coitus.",
+        "scene": "Maude clinically describes what she expects of the Dude during their conversation."
+      },
+      {
+        "quote": "Lord. You can imagine where it goes from here.",
+        "scene": "Maude on her father's history with women, while showing the Dude an old photo."
+      }
+    ],
+    "The Big Lebowski (Jeffrey Lebowski)": [
+      {
+        "quote": "Your revolution is over, Mr. Lebowski. Condolences. The bums lost!",
+        "scene": "The Big Lebowski rails at the Dude in his mansion study."
+      },
+      {
+        "quote": "The bums will always lose, do you hear me, Lebowski?",
+        "scene": "The millionaire's tirade about the Dude's lifestyle."
+      },
+      {
+        "quote": "What makes a man, Mr. Lebowski?",
+        "scene": "The Big Lebowski's pompous question to the Dude during their first meeting."
+      },
+      {
+        "quote": "Strong men also cry. Strong men also cry.",
+        "scene": "The Big Lebowski tearfully tells the Dude about Bunny's supposed kidnapping."
+      }
+    ],
+    "Brandt": [
+      {
+        "quote": "Her life is in your hands, Dude.",
+        "scene": "Brandt anxiously hands the Dude the ransom briefcase."
+      },
+      {
+        "quote": "Lots of, uh, lots of achievements, Dude.",
+        "scene": "Brandt nervously tours the Dude through the Big Lebowski's wall of accomplishments."
+      },
+      {
+        "quote": "That's marvelous!",
+        "scene": "Brandt's rehearsed enthusiasm during the Dude's tour of the mansion."
+      }
+    ],
+    "Nihilists (Uli, Kieffer, Franz)": [
+      {
+        "quote": "We want ze money, Lebowski!",
+        "scene": "The nihilists confront the Dude in his apartment with a ferret."
+      },
+      {
+        "quote": "We believe in nothing, Lebowski! Nothing!",
+        "scene": "The nihilists shout at the Dude during the parking lot showdown."
+      },
+      {
+        "quote": "Ve cut off your chonson.",
+        "scene": "Uli threatens the Dude in his bathtub while dropping a ferret in the water."
+      }
+    ],
+    "Bunny Lebowski": [
+      {
+        "quote": "I'll suck your cock for a thousand dollars.",
+        "scene": "Bunny propositions the Dude on her first appearance at the Lebowski mansion pool."
+      }
+    ],
+    "Jackie Treehorn": [
+      {
+        "quote": "People forget that the brain is the biggest erogenous zone.",
+        "scene": "Treehorn entertains the Dude at his Malibu beach party."
+      },
+      {
+        "quote": "New advances in marketing.",
+        "scene": "Treehorn vaguely describes his line of work to the Dude."
+      }
+    ],
+    "Da Fino": [
+      {
+        "quote": "I'm a brother shamus.",
+        "scene": "Da Fino introduces himself to the Dude as a fellow private detective in the Dude's car."
+      }
+    ]
+  }
+}

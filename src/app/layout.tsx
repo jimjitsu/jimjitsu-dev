@@ -3,6 +3,7 @@ import "./globals.css";
 import { fontVariables } from "@/lib/fonts";
 import { Sidebar } from "@/components/sidebar";
 import { SidebarShell } from "@/components/sidebar-shell";
+import { ChatWidget } from "@/components/chat-widget";
 import { SITE_URL } from "@/lib/constants";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
           <Sidebar />
         </SidebarShell>
         <div className="lg:pl-72">{children}</div>
+        <ChatWidget />
         <Analytics />
       </body>
     </html>

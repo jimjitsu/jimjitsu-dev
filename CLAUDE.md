@@ -17,7 +17,7 @@ pnpm contentful:migrate:initial                        # run 0001-initial-conten
 node scripts/run-migration.cjs migrations/<file>.cjs   # run any migration directly
 ```
 
-There are no automated tests yet (Vitest + Playwright are planned post-launch).
+There are no automated tests yet (Vitest + Playwright are planned).
 
 ## Architecture
 
@@ -60,3 +60,19 @@ Every dynamic route (`/blog/[slug]`, `/projects/[slug]`) exports `generateStatic
 ### Contentful migrations
 
 Migration files live in `migrations/` and are plain CommonJS (`*.cjs`). The runner (`scripts/run-migration.cjs`) reads `.env.local` directly via Node.js to avoid shell variable expansion issues on Windows. Each migration should be idempotent within an environment — don't re-run an already-applied migration.
+
+### Digital Twin Chatbot ("Jimbo-t & The Stranger")
+
+A floating chat widget mounted in `layout.tsx`. Full spec: `docs/spec-digital-twin-chatbot.md`.
+
+**New env vars** (add to `.env.local` and Vercel dashboard):
+- `OPENROUTER_API_KEY` — server-side only, never expose to the browser
+- `OPENROUTER_MODEL` — optional; defaults to `google/gemini-2.5-flash`
+
+**Key files:**
+- `src/app/api/chat/route.ts` — `POST /api/chat`; validates request, calls OpenRouter, returns `{ jimbot, stranger? }` JSON
+- `src/lib/chat-context.ts` — assembles career context string from Contentful; wrapped in `unstable_cache` at 60s revalidation. Called at request time only — never at module init.
+- `src/lib/chat-prompts.ts` — `buildSystemPrompt(careerContext)` assembles the 6-section system prompt; imports quote library from `src/data/big_lebowski_quotes.json`
+- `src/components/chat-widget.tsx` — `"use client"` component; full widget UI with focus trap, Escape-to-close, 800ms Stranger reveal delay
+
+**`unstable_cache` pattern:** `getCareerContext()` in `chat-context.ts` wraps the Contentful fetch with `unstable_cache(fn, [key], { revalidate: 60 })`. The function is only invoked inside the route handler (request time), never at module initialization.

@@ -1,8 +1,8 @@
 # Portfolio Site & Blog — Project Specification
 
-**Status:** v1.0 — ready for build
+**Status:** v1.1 — digital twin chatbot + testing promoted to MVP
 **Owner:** Jim Tierney
-**Last updated:** 2026-04-24
+**Last updated:** 2026-05-19
 
 ---
 
@@ -10,7 +10,7 @@
 
 A personal portfolio and blog for a frontend engineer. The site serves as a professional home on the web: a place to showcase project work, publish writing, and provide a clear path for prospective employers, collaborators, and readers to learn about the author and get in touch.
 
-The site will be a multi-page React/Next.js application, with long-form content (projects and blog posts) managed through Contentful as a headless CMS.
+The site will be a multi-page React/Next.js application, with long-form content (projects and blog posts) managed through Contentful as a headless CMS. The site will also include a digital twin chatbot — "Jimbo-t" — an AI-powered career Q&A widget voiced in the style of The Big Lebowski characters, letting visitors ask about Jim's work and background.
 
 ## 2. Goals
 
@@ -19,6 +19,7 @@ The site will be a multi-page React/Next.js application, with long-form content 
 - Rank well in search for the author's name and for blog post topics.
 - Be fast, accessible, and mobile-friendly by default.
 - Serve as a living demonstration of the author's own frontend capabilities.
+- Demonstrate real-world AI integration (LLM API, prompt engineering, structured output) as part of the portfolio itself.
 
 ## 3. Non-Goals (for v1)
 
@@ -43,15 +44,16 @@ The site will be a multi-page React/Next.js application, with long-form content 
 |---|---|---|
 | Framework | Next.js (App Router) | SSG/ISR for content pages; SSR where dynamic. |
 | Language | TypeScript | Strict mode. |
-| UI | React 18+ | Server Components where appropriate. |
-| Content format | **Markdown** (GFM) | Project case studies and blog posts authored as markdown in Contentful. Rendered with `react-markdown` + `remark-gfm` + syntax highlighting via `rehype-pretty-code` (Shiki). |
+| UI | React 19+ | Server Components where appropriate. |
+| Content format | **Markdown** (GFM) | Project case studies and blog posts authored as markdown in Contentful. Rendered via the `unified` pipeline: `remark-parse → remark-gfm → remark-rehype → rehype-pretty-code (Shiki) → rehype-stringify`. Output via `dangerouslySetInnerHTML` in an async Server Component — `react-markdown`'s synchronous `runSync` is incompatible with async `rehype-pretty-code`. |
 | Styling | **Tailwind CSS** | Utility-first, with `@tailwindcss/typography` for long-form markdown content. |
 | CMS | Contentful | Headless, fetched at build time (ISR) via Contentful Delivery API. |
 | Hosting | **Vercel** | Zero-config Next.js deploys; preview URLs per PR; Vercel Image Optimization. |
 | Analytics | **Vercel Analytics** | Enabled via the Vercel dashboard at launch. |
+| AI / chatbot | **OpenRouter → Gemini 2.5 Flash** | `/api/chat` route; OpenAI-compatible endpoint. Full spec in `docs/spec-digital-twin-chatbot.md`. Fallback: `anthropic/claude-3-5-haiku`. |
 | Contact | **Mailto + social links** | No form backend in v1. Email link in footer and home CTA. |
 | Package manager | pnpm | Fast installs, disk-efficient. |
-| Testing | Vitest + Playwright *(post-MVP)* | Not blocking v1 launch; add when the site stabilizes. |
+| Testing | **Vitest + Playwright** | Unit tests for API/lib logic; Playwright smoke tests for key user flows. Run in CI on every PR. |
 
 ## 6. Site Architecture
 
@@ -61,7 +63,7 @@ A persistent **sidebar** carries all primary navigation (no top header, no tradi
 
 - **Desktop (`lg:` ≥1024px):** sidebar is fixed to the left, ~288px (`w-72`) wide, full height. Main content sits to its right (`lg:pl-72`).
 - **Mobile / tablet:** sidebar is hidden by default behind a hamburger button (top-right, fixed). Tapping reveals the sidebar as a slide-in drawer with a dimming backdrop. Tapping the backdrop or any nav link auto-closes it.
-- **Sidebar contents, top → bottom:** logo block (placeholder for now — bowling-pin glyph in a black brutalist square), name + short intro line, primary nav (home / projects / blog / about), spacer, then a bottom group with mailto, social links, and copyright.
+- **Sidebar contents, top → bottom:** logo block (bowling-pin glyph in a black brutalist square), name + short intro line, primary nav (home / projects / blog / about), spacer, then a bottom group with mailto, social links, and copyright.
 - **Implementation:** `Sidebar` is a server component fetching `SiteSettings`; `SidebarShell` is a client component holding open/close state, route-change auto-close, and body-scroll lock while open.
 
 ### 6.1 Page Map
@@ -73,12 +75,14 @@ A persistent **sidebar** carries all primary navigation (no top header, no tradi
 - `/blog/[slug]` — Individual blog post
 - `/about` — About page (dedicated), plus a shorter About section on the home page
 - `/resume.pdf` — Downloadable resume (static file served from `/public`)
-- `/404`, `/500` — Error pages
+- `not-found.tsx` — 404 page (Next.js App Router convention)
+- `error.tsx` — Runtime error boundary (replaces traditional `/500`)
 - `/rss.xml`, `/sitemap.xml`, `/robots.txt` — Feeds & SEO
+- `/api/chat` — POST endpoint for the digital twin chatbot (server-only)
 
 ### 6.2 Homepage Sections
 
-The homepage is composed of multiple overview sections, stacked vertically. Proposed sections (to be refined):
+The homepage is composed of multiple overview sections, stacked vertically:
 
 1. **Hero** — Name, role, one-line value proposition, primary CTAs (e.g., "See projects", "Read the blog").
 2. **About snapshot** — Short bio paragraph with a "More about me" link to `/about` and a "Download resume" link to `/resume.pdf`.
@@ -96,18 +100,31 @@ The homepage is composed of multiple overview sections, stacked vertically. Prop
 ### 6.4 Blog Section
 
 - Index page lists posts in reverse-chronological order with title, date, excerpt, and tags.
-- Pagination or infinite scroll for older posts *(pagination preferred for SEO)*.
+- v1 loads all posts in a single fetch (no pagination — acceptable at current content volume). Pagination deferred to v1.1.
 - Post detail page renders markdown from Contentful: headings, images, code blocks with syntax highlighting, blockquotes, links.
 - Tag pages at `/blog/tag/[tag]` *(optional — v1.1)*.
 - RSS feed at `/rss.xml`.
+
+### 6.5 Digital Twin Chatbot ("Jimbo-t & The Stranger")
+
+A floating chat widget mounted in `layout.tsx` (fixed bottom-right, all pages). Two AI characters:
+
+- **Jimbo-t** (primary) — sardonic Dude/Walter voice; answers career, skills, and project questions using Contentful data as context.
+- **The Stranger** (secondary) — Sam Elliott narrator; interjects whenever Jimbo-t swears or echoes one of his canonical quotes.
+
+Backend: `POST /api/chat` route in `src/app/api/chat/route.ts`. Calls OpenRouter → Gemini 2.5 Flash with a structured JSON response containing both character outputs in one round-trip. Career context (projects, blog posts, bio) is fetched from Contentful at request time and cached via `unstable_cache` at 60s revalidation.
+
+Full spec: `docs/spec-digital-twin-chatbot.md`.
+
+**IP note:** Character names (The Dude, Walter Sobchak, The Stranger) and quotes are from *The Big Lebowski* (© Universal Pictures). Usage here is personal, non-commercial, and not affiliated with the film — consistent with fan/parody fair use. Not intended for monetization.
 
 ## 7. Content Model (Contentful)
 
 All long-form body fields use Contentful's **Long text** field type, which the Contentful UI renders with a built-in markdown editor (preview + basic toolbar). No Rich Text fields in v1.
 
-Images referenced inside markdown bodies use either (a) markdown image syntax pointing at Contentful asset URLs, or (b) a simple custom syntax (e.g., `![alt](contentful:assetId)`) that the renderer resolves to a `next/image` component for optimization. Decide the exact approach during build.
+Images inside markdown bodies use standard markdown image syntax (`![alt](https://images.ctfassets.net/...)`) pointing directly at Contentful CDN URLs. No custom image resolver — the renderer outputs a standard `<img>` tag; `next/image` optimization is not applied to inline body images in v1.
 
-Field lists are starting points and will be refined.
+Field lists reflect the implemented migration (`migrations/0001-initial-content-types.cjs`).
 
 ### 7.1 `Project`
 
@@ -143,7 +160,7 @@ Field lists are starting points and will be refined.
 - `name` (Short text)
 - `bio` (Long text / markdown)
 - `avatar` (Media)
-- `socialLinks` (JSON or references)
+- `socialLinks` (JSON object — e.g. `{ github, linkedin, x }`)
 
 ### 7.4 `SiteSettings` (singleton)
 
@@ -234,16 +251,18 @@ Add to the library as new motifs are needed; keep all icons at the 24×24 viewBo
 ## 11. Analytics & Observability
 
 - **Vercel Analytics** enabled at launch via the Vercel dashboard.
+- **LLM cost monitoring:** Set a hard monthly budget cap in the OpenRouter dashboard; set a Vercel spend alert as a backstop. Review after the first month of real traffic.
 - Error tracking: deferred past MVP. Add Sentry or similar once the site sees real traffic.
 - Uptime monitoring: not needed for v1.
 
 ## 12. Build, Deploy, & Content Workflow
 
 - **Source control:** GitHub, with PR-based workflow.
-- **CI:** Run typecheck, lint, and tests on every PR.
+- **CI:** GitHub Actions (`.github/workflows/`) — runs typecheck, lint, and tests on every PR.
 - **Preview deploys:** Every PR gets a preview URL.
 - **Content updates:** Contentful webhook → revalidate affected pages via on-demand ISR.
-- **Environments:** `production` (main branch) and `preview` (PRs). Contentful spaces: single space with preview + published environments, or a dedicated preview space *(TBD)*.
+- **Environments:** `production` (main branch) and `preview` (PRs). Single Contentful space (`glsf6lviq3r0`), `jimjitsu-dev` environment for all content authoring.
+- **Chatbot env vars:** `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` must be added to both Production and Preview environments in the Vercel dashboard — preview deploys will silently break the chatbot if these are absent.
 
 ## 13. Decisions Log
 
@@ -253,14 +272,17 @@ Resolved 2026-04-24:
 2. **Hosting:** Vercel.
 3. **About:** Short About section on home + dedicated `/about` page.
 4. **Contact:** Mailto link + social links only — no form in v1.
-5. **Design direction:** Rough ideas in hand; needs a follow-up design conversation to finalize typography, color, and tone before build starts.
+5. **Design direction:** Brutalist + retro bowling alley aesthetic finalized. Typography: Sancreek (display) / Orbitron (eyebrow) / JetBrains Mono (body). Color: "Strike Lane" palette (see §8.3). Implemented.
 6. **v1 feature adds:** Resume / CV download (`/resume.pdf`). No newsletter, `/now`, or `/uses`.
-7. **Timeline:** MVP in 1–2 weeks.
+7. **Timeline:** MVP in ~16 days (see §16 milestones).
 8. **Launch content:** Small starter set — 1–3 projects and 1–3 blog posts.
 9. **Domain:** `jimjitsu.dev`, registered via GoDaddy. DNS managed at GoDaddy; point `A` / `CNAME` records to Vercel at launch (no nameserver change required).
 10. **Contentful:** Reuse the existing space (ID `glsf6lviq3r0`). Treat as a clean slate — current draft entries will not be migrated. Project lives in a dedicated environment within the space (e.g., a `jimjitsu-dev` environment branched from `master`) so content authoring stays isolated.
 11. **GitHub repo:** Public, named `jimjitsu-dev`. Repo itself is part of the portfolio.
 12. **Analytics:** Vercel Analytics at launch.
+13. **Digital twin chatbot:** Promoted to MVP scope. Full design decisions documented in `docs/spec-digital-twin-chatbot.md` (§12 of that doc).
+14. **Testing:** Vitest + Playwright promoted to MVP. Minimum viable suite: unit tests for `/api/chat` validation and prompt assembly; Playwright smoke tests for homepage, chatbot widget, and project/blog detail pages.
+15. **LLM provider:** OpenRouter with `google/gemini-2.5-flash`. Decisive factor: 1M context window fits all career data without RAG. Fallback: `anthropic/claude-3-5-haiku-20241022`.
 
 ## 14. Launch Starter Content
 
@@ -309,7 +331,7 @@ Both projects and posts will be stubbed with placeholders during the build so pa
 
 - Pick the third blog post topic.
 
-## 16. Milestones — 1 to 2 Week MVP Plan
+## 16. Milestones — ~16 Day MVP Plan
 
 Aggressive timeline; scope is deliberately trimmed. Anything not in this list is post-launch.
 
@@ -340,8 +362,16 @@ Aggressive timeline; scope is deliberately trimmed. Anything not in this list is
 - Analytics enabled.
 - Lighthouse pass, accessibility sweep, 375px/768px/1440px visual QA.
 - Custom domain + DNS.
+- Wire up testing: Vitest config + Playwright config; smoke tests for homepage, project detail, and blog detail pages. (Chatbot widget tests added in Days 13–14 Phase 4, once the widget exists.)
 
-**Day 13–14 — Launch & buffer**
+**Days 13–14 — Digital Twin Chatbot**
+- Phase 1 (Infrastructure): `src/lib/chat-context.ts`, `src/lib/chat-prompts.ts`, `src/app/api/chat/route.ts`. Add `OPENROUTER_API_KEY` / `OPENROUTER_MODEL` to `.env.local` and `.env.local.example`.
+- Phase 2 (Prompt iteration): Manual verification via `curl` — character voice, trigger logic, JSON reliability.
+- Phase 3 (UI): `src/components/chat-widget.tsx` + `ChatBubbleIcon`; mount `<ChatWidget />` in `layout.tsx`.
+- Phase 4 (Hardening): Rate limiting, input sanitization, error states, typecheck + build pass. Add Playwright smoke test for chatbot widget (open, send message, receive response). Update `CLAUDE.md`.
+- Full checklist in `docs/spec-digital-twin-chatbot.md` §11.
+
+**Days 15–16 — Launch & buffer**
 - Deploy to production. Smoke test. Announce.
 
 **Post-launch backlog (explicitly out of scope for v1):**
