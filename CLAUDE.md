@@ -11,13 +11,20 @@ pnpm typecheck            # tsc --noEmit
 pnpm lint                 # ESLint
 pnpm format               # Prettier (write)
 pnpm format:check         # Prettier (check only)
+pnpm test                 # Vitest unit tests (run once)
+pnpm test:watch           # Vitest watch mode
+pnpm test:e2e             # Playwright e2e tests (starts dev server automatically)
+pnpm test:e2e:ui          # Playwright UI mode
 
 # Contentful migrations
 pnpm contentful:migrate:initial                        # run 0001-initial-content-types.cjs
 node scripts/run-migration.cjs migrations/<file>.cjs   # run any migration directly
 ```
 
-There are no automated tests yet (Vitest + Playwright are planned).
+**Testing layout:**
+- Unit tests live in `src/__tests__/` and match `**/*.test.ts`. Run with `pnpm test`.
+- E2e tests live in `e2e/` and match `**/*.spec.ts`. Run with `pnpm test:e2e`.
+- Playwright starts `pnpm dev` automatically; it reuses an already-running server in local dev.
 
 ## Architecture
 
