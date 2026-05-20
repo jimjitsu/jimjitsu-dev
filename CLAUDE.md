@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 pnpm dev                  # start Next.js dev server
+pnpm storybook            # start Storybook dev server (port 6006)
+pnpm build-storybook      # build static Storybook site
 pnpm build                # production build
 pnpm typecheck            # tsc --noEmit
 pnpm lint                 # ESLint
@@ -25,6 +27,14 @@ node scripts/run-migration.cjs migrations/<file>.cjs   # run any migration direc
 - Unit tests live in `src/__tests__/` and match `**/*.test.ts`. Run with `pnpm test`.
 - E2e tests live in `e2e/` and match `**/*.spec.ts`. Run with `pnpm test:e2e`.
 - Playwright starts `pnpm dev` automatically; it reuses an already-running server in local dev.
+
+**Storybook layout:**
+- Stories live in `src/stories/` and match `**/*.stories.tsx`. Run with `pnpm storybook`.
+- Contentful mock factories are in `src/stories/mocks/contentful.ts`.
+- Story types (`Meta`, `StoryObj`, `Decorator`) come from `@storybook/react`, not `@storybook/nextjs`.
+- Dark mode: no toolbar toggle — `withThemeByMediaQuery` was removed in `@storybook/addon-themes@10`. Stories respect the actual OS `prefers-color-scheme`, which matches how the site works.
+- `@storybook/addon-essentials` is **incompatible** with `storybook@10` — do not add it. Use `@storybook/addon-docs@^10` instead.
+- Test utilities (`userEvent`, `expect`) import from `"storybook/test"`, not `"@storybook/test"`.
 
 ## Architecture
 

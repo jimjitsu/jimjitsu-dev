@@ -3,6 +3,7 @@ import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
 import { contentful, type AuthorSkeleton } from "@/lib/contentful";
 import { BowlingPinIcon } from "@/components/icons";
+import { PageHeader } from "@/components/page-header";
 import { JsonLd } from "@/components/json-ld";
 import { CONTACT_EMAIL, SITE_URL } from "@/lib/constants";
 
@@ -47,13 +48,11 @@ export default async function AboutPage() {
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">
       <JsonLd schema={personSchema} />
 
-      <header className="flex flex-col gap-4">
-        <p className="eyebrow flex items-center gap-2">
-          <BowlingPinIcon size={16} className="text-red" />
-          About
-        </p>
-        <h1 className="display-heading">{author?.fields.name ?? "Jim Tierney"}.</h1>
-      </header>
+      <PageHeader
+        eyebrow="About"
+        icon={<BowlingPinIcon size={16} className="text-red" />}
+        title={`${author?.fields.name ?? "Jim Tierney"}.`}
+      />
 
       {author?.fields.avatar && "fields" in author.fields.avatar && (
         <div className="max-w-xs border-2 border-ink">

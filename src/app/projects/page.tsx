@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getAllProjects } from "@/lib/contentful";
 import { ProjectCard } from "@/components/project-card";
 import { StrikeIcon } from "@/components/icons";
+import { PageHeader } from "@/components/page-header";
 
 export const revalidate = 60;
 
@@ -18,16 +19,12 @@ export default async function ProjectsIndexPage() {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-4xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">
-      <header className="flex flex-col gap-4">
-        <p className="eyebrow flex items-center gap-2">
-          <StrikeIcon size={16} className="text-red" />
-          Selected work
-        </p>
-        <h1 className="display-heading">Projects.</h1>
-        <p className="max-w-2xl text-base leading-relaxed text-ink-muted">
-          Case studies from work shipped over the years.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Selected work"
+        icon={<StrikeIcon size={16} className="text-red" />}
+        title="Projects."
+        description="Case studies from work shipped over the years."
+      />
 
       {projects.length === 0 ? (
         <p className="text-sm text-ink-muted">No projects published yet.</p>

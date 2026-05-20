@@ -49,26 +49,26 @@ Install all Storybook packages as dev dependencies in a single command:
 
 ```bash
 pnpm add -D \
-  storybook \
-  @storybook/nextjs \
-  @storybook/addon-essentials \
-  @storybook/addon-themes \
-  @storybook/addon-interactions \
-  @storybook/test \
-  msw \
-  msw-storybook-addon
+  storybook@^10 \
+  @storybook/nextjs@^10 \
+  @storybook/addon-docs@^10 \
+  @storybook/addon-themes@^10 \
+  msw@^2 \
+  msw-storybook-addon@^2
 ```
 
 | Package | Role |
 |---|---|
 | `storybook` | CLI (`storybook dev`, `storybook build`) |
 | `@storybook/nextjs` | Framework adapter — handles `next/image`, `next/link`, `next/navigation`, and `next/font` automatically |
-| `@storybook/addon-essentials` | Bundles: Docs, Controls, Actions, Backgrounds, Viewport, Toolbars |
-| `@storybook/addon-themes` | Dark mode toggle via `withThemeByMediaQuery` — emulates `prefers-color-scheme: dark` |
-| `@storybook/addon-interactions` | Plays `play` functions in the story panel; required for interaction tests |
-| `@storybook/test` | `userEvent`, `expect`, `fn()` — testing utilities for play functions |
+| `@storybook/addon-docs` | Docs page and MDX support; the only essential sub-addon that ships separately at v10 |
+| `@storybook/addon-themes` | Theme toolbar; use `withThemeByDataAttribute` or `withThemeByClassName` (v10 removed `withThemeByMediaQuery`) |
 | `msw` | Mock Service Worker — intercepts `fetch` in the browser for `ChatWidget` stories |
 | `msw-storybook-addon` | Wires MSW into Storybook's preview lifecycle |
+
+**Storybook v10 bundled features** — interactions (`play` functions), controls, actions, viewport, and backgrounds are built into `storybook@10` core and do **not** require separate addon packages. `@storybook/test` exports (`userEvent`, `expect`) are imported from `"storybook/test"` (no separate package).
+
+**`@storybook/addon-essentials` is incompatible with storybook@10** — it internally bundles `@storybook/addon-toolbars@8` which imports `Icons` from `storybook/internal/components`, an API removed in v10. Do not install it.
 
 After installing MSW, initialize the service worker file in the Next.js public directory:
 
@@ -94,8 +94,7 @@ import type { StorybookConfig } from "@storybook/nextjs";
 const config: StorybookConfig = {
   stories: ["../src/stories/**/*.stories.@(ts|tsx)"],
   addons: [
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
+    "@storybook/addon-docs",
     "@storybook/addon-themes",
     "msw-storybook-addon",
   ],
@@ -117,25 +116,13 @@ Key points:
 ### 4.2 `.storybook/preview.ts`
 
 ```typescript
-import type { Preview } from "@storybook/nextjs";
-import { withThemeByMediaQuery } from "@storybook/addon-themes";
+import type { Preview } from "@storybook/react";
 import { initialize, mswLoader } from "msw-storybook-addon";
 import "../src/app/globals.css";
 
-// Initialize MSW. onUnhandledRequest: "bypass" avoids console noise for
-// Storybook's own internal requests (HMR, fonts, etc.).
 initialize({ onUnhandledRequest: "bypass" });
 
 const preview: Preview = {
-  decorators: [
-    withThemeByMediaQuery({
-      themes: {
-        light: "",
-        dark: "(prefers-color-scheme: dark)",
-      },
-      defaultTheme: "light",
-    }),
-  ],
   loaders: [mswLoader],
   parameters: {
     nextjs: {
@@ -149,7 +136,9 @@ const preview: Preview = {
 export default preview;
 ```
 
-**Why `backgrounds: { disable: true }`** — the Strike Lane palette is defined in `globals.css` as CSS custom properties. Enabling the Backgrounds addon's color picker would overlay an arbitrary background that breaks the design token chain. The dark mode toggle (via `withThemeByMediaQuery`) is the correct mechanism for theme switching on this site.
+**Why `backgrounds: { disable: true }`** — the Strike Lane palette is defined in `globals.css` as CSS custom properties. Enabling the Backgrounds addon's color picker would overlay an arbitrary background that breaks the design token chain.
+
+**Why no dark mode decorator** — `withThemeByMediaQuery` was removed in `@storybook/addon-themes@10`. The site uses `prefers-color-scheme: dark` (CSS media query, not a class or data attribute), which cannot be emulated by the remaining v10 decorator helpers (`withThemeByClassName`, `withThemeByDataAttribute`) without changing `globals.css`. Stories accurately reflect dark mode when the user's OS is set to dark mode — which is how the site actually works.
 
 **Why `nextjs: { appDirectory: true }`** — tells `@storybook/nextjs` to use the App Router context, which makes `next/navigation` hooks (`useRouter`, `usePathname`) available inside stories.
 
@@ -190,9 +179,9 @@ In practice, this is only needed for stories that render the root `<html>` equiv
 
 ### 5.3 Dark Mode
 
-The site uses `prefers-color-scheme: dark` in `globals.css` (not a Tailwind `dark:` class variant). The `withThemeByMediaQuery` decorator in `preview.ts` emulates this by injecting a media query override into the rendered iframe, so toggling "dark" in the Storybook toolbar accurately reflects how the site looks in dark mode.
+The site uses `prefers-color-scheme: dark` in `globals.css` (not a Tailwind `dark:` class variant). Storybook v10 removed `withThemeByMediaQuery`, and there is no replacement decorator that emulates OS media queries without modifying `globals.css`. Stories respect the user's actual OS preference, which accurately reflects the real site behavior.
 
-No story-level configuration is required — the decorator runs globally and every story gets the theme toolbar toggle.
+No Storybook decorator is configured for dark mode — `globals.css` handles it natively via the media query.
 
 ---
 
@@ -867,7 +856,7 @@ CLAUDE.md                            Document Storybook scripts and stories loca
 |---|---|---|
 | Storybook version | 8.x (`storybook@latest`) | React 19 support; CSF3 native |
 | Framework adapter | `@storybook/nextjs` | Handles `next/image`, `next/link`, `next/navigation`, `next/font` — no manual mocking |
-| Dark mode mechanism | `withThemeByMediaQuery` | Matches the site's real implementation (CSS media query, not a class or data attribute) |
+| Dark mode mechanism | No decorator; OS preference | `withThemeByMediaQuery` removed in v10; no replacement works without changing `globals.css` |
 | Backgrounds addon | Disabled | CSS custom properties define background — the addon would conflict |
 | Stories location | `src/stories/` (not co-located) | Keeps `src/components/` free of non-production files; easier to audit |
 | Contentful mocking | Plain TypeScript factories | No addon needed; fully typed; simple to extend |

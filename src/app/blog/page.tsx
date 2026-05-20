@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getAllBlogPosts } from "@/lib/contentful";
 import { BlogPostCard } from "@/components/blog-post-card";
 import { BowlingPinIcon } from "@/components/icons";
+import { PageHeader } from "@/components/page-header";
 
 export const revalidate = 60;
 
@@ -15,16 +16,12 @@ export default async function BlogIndexPage() {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-4xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">
-      <header className="flex flex-col gap-4">
-        <p className="eyebrow flex items-center gap-2">
-          <BowlingPinIcon size={16} className="text-amber" />
-          From the blog
-        </p>
-        <h1 className="display-heading">Writing.</h1>
-        <p className="max-w-2xl text-base leading-relaxed text-ink-muted">
-          Notes on frontend craft, design systems, and the projects I&apos;m working on.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="From the blog"
+        icon={<BowlingPinIcon size={16} className="text-amber" />}
+        title="Writing."
+        description="Notes on frontend craft, design systems, and the projects I'm working on."
+      />
 
       {posts.length === 0 ? (
         <p className="text-sm text-ink-muted">No posts published yet.</p>

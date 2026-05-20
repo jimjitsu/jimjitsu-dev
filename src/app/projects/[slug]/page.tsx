@@ -4,7 +4,8 @@ import Link from "next/link";
 import { getAllProjects, getProjectBySlug } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
-import { LaneArrowIcon } from "@/components/icons";
+import { BackLink } from "@/components/back-link";
+import { ProjectMetaBar } from "@/components/project-meta-bar";
 import { JsonLd } from "@/components/json-ld";
 import { SITE_URL } from "@/lib/constants";
 
@@ -77,13 +78,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">
       <JsonLd schema={breadcrumbSchema} />
 
-      <Link
-        href="/projects"
-        className="inline-flex items-center gap-2 font-eyebrow text-sm tracking-[0.04em] text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
-      >
-        <LaneArrowIcon size={14} className="-rotate-90" />
-        All projects
-      </Link>
+      <BackLink href="/projects" label="All projects" />
 
       <header className="flex flex-col gap-4">
         <p className="eyebrow">Case study</p>
@@ -99,47 +94,12 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
         </div>
       )}
 
-      <dl className="grid grid-cols-1 gap-x-10 gap-y-4 border-y-2 border-ink py-6 sm:grid-cols-3">
-        {role && (
-          <div>
-            <dt className="eyebrow-sm">Role</dt>
-            <dd className="mt-1 text-sm text-ink">{role}</dd>
-          </div>
-        )}
-        {technologies && technologies.length > 0 && (
-          <div>
-            <dt className="eyebrow-sm">Tech</dt>
-            <dd className="mt-1 text-sm text-ink">{technologies.join(" · ")}</dd>
-          </div>
-        )}
-        {(liveUrl || repoUrl) && (
-          <div>
-            <dt className="eyebrow-sm">Links</dt>
-            <dd className="mt-1 flex flex-col gap-1 text-sm">
-              {liveUrl && (
-                <a
-                  href={liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
-                >
-                  Live site ↗
-                </a>
-              )}
-              {repoUrl && (
-                <a
-                  href={repoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
-                >
-                  Repository ↗
-                </a>
-              )}
-            </dd>
-          </div>
-        )}
-      </dl>
+      <ProjectMetaBar
+        role={role}
+        technologies={technologies ?? undefined}
+        liveUrl={liveUrl}
+        repoUrl={repoUrl}
+      />
 
       <MarkdownContent source={body} />
     </main>

@@ -3,6 +3,8 @@ import { contentful, getAllBlogPosts, getSiteSettings, type AuthorSkeleton, type
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { ProjectCard } from "@/components/project-card";
 import { BlogPostCard } from "@/components/blog-post-card";
+import { SectionHeader } from "@/components/section-header";
+import { SkillGroup as SkillGroupComponent } from "@/components/skill-group";
 import {
   BowlingBallIcon,
   BowlingPinIcon,
@@ -177,23 +179,13 @@ function FeaturedProjectsSection({
 }) {
   return (
     <section aria-labelledby="projects-heading" className="flex flex-col gap-6">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <p className="eyebrow flex items-center gap-2">
-            <StrikeIcon size={16} className="text-red" />
-            Selected work
-          </p>
-          <h2 id="projects-heading" className="display-heading">
-            Featured projects.
-          </h2>
-        </div>
-        <Link
-          href="/projects"
-          className="font-eyebrow text-sm tracking-[0.04em] text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
-        >
-          All projects →
-        </Link>
-      </div>
+      <SectionHeader
+        eyebrow="Selected work"
+        icon={<StrikeIcon size={16} className="text-red" />}
+        title="Featured projects."
+        seeAllHref="/projects"
+        seeAllLabel="All projects"
+      />
       {projects.length === 0 ? (
         <p className="text-sm text-ink-muted">
           Mark a few projects as <code>Featured</code> in Contentful to populate this section.
@@ -218,23 +210,13 @@ function RecentWritingSection({
 }) {
   return (
     <section aria-labelledby="writing-heading" className="flex flex-col gap-6">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <p className="eyebrow flex items-center gap-2">
-            <BowlingPinIcon size={16} className="text-amber" />
-            From the blog
-          </p>
-          <h2 id="writing-heading" className="display-heading">
-            Recent writing.
-          </h2>
-        </div>
-        <Link
-          href="/blog"
-          className="font-eyebrow text-sm tracking-[0.04em] text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
-        >
-          All posts →
-        </Link>
-      </div>
+      <SectionHeader
+        eyebrow="From the blog"
+        icon={<BowlingPinIcon size={16} className="text-amber" />}
+        title="Recent writing."
+        seeAllHref="/blog"
+        seeAllLabel="All posts"
+      />
       {posts.length === 0 ? (
         <p className="text-sm text-ink-muted">
           No blog posts yet — publish one in Contentful and it&apos;ll show up here.
@@ -267,21 +249,7 @@ function SkillsSection({ skills, attributes }: { skills: SkillGroup[]; attribute
 
       <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {skills.map(({ label, items }) => (
-          <div key={label} className="flex flex-col gap-3 border-2 border-ink p-4">
-            <dt className="eyebrow-sm">{label}</dt>
-            <dd>
-              <ul className="flex flex-wrap gap-2">
-                {items.map((item) => (
-                  <li
-                    key={item}
-                    className="border border-ink px-2 py-0.5 font-eyebrow text-xs tracking-[0.04em] text-ink"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </dd>
-          </div>
+          <SkillGroupComponent key={label} label={label} items={items} />
         ))}
       </dl>
 

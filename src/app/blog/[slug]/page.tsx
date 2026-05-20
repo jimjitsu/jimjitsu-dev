@@ -4,7 +4,8 @@ import Link from "next/link";
 import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
-import { LaneArrowIcon } from "@/components/icons";
+import { BackLink } from "@/components/back-link";
+import { ArticleMetaLine } from "@/components/article-meta-line";
 import { JsonLd } from "@/components/json-ld";
 import { SITE_URL } from "@/lib/constants";
 
@@ -97,13 +98,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <JsonLd schema={articleSchema} />
       <JsonLd schema={breadcrumbSchema} />
 
-      <Link
-        href="/blog"
-        className="inline-flex items-center gap-2 font-eyebrow text-sm tracking-[0.04em] text-ink decoration-amber decoration-2 underline-offset-4 hover:underline"
-      >
-        <LaneArrowIcon size={14} className="-rotate-90" />
-        All posts
-      </Link>
+      <BackLink href="/blog" label="All posts" />
 
       <header className="flex flex-col gap-4">
         <p className="eyebrow">Post</p>
@@ -111,17 +106,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         {excerpt && (
           <p className="max-w-2xl text-base leading-relaxed text-ink-muted">{excerpt}</p>
         )}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 font-eyebrow text-xs tracking-[0.04em] text-ink-muted">
-          <time dateTime={publishDate}>
-            {new Date(publishDate).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </time>
-          {authorName && <span>· {authorName}</span>}
-          {tags && tags.length > 0 && <span>· {tags.map((t) => `#${t}`).join(" ")}</span>}
-        </div>
+        <ArticleMetaLine publishDate={publishDate} author={authorName} tags={tags ?? undefined} />
       </header>
 
       {coverImage && "fields" in coverImage && (
