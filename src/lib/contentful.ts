@@ -49,6 +49,8 @@ export type BlogPostSkeleton = {
   };
 };
 
+export type SkillGroup = { label: string; items: string[] };
+
 export type SiteSettingsSkeleton = {
   contentTypeId: "siteSettings";
   fields: {
@@ -58,6 +60,11 @@ export type SiteSettingsSkeleton = {
     navLinks?: EntryFieldTypes.Object<Array<{ label: string; href: string }>>;
     footerLinks?: EntryFieldTypes.Object<Array<{ label: string; href: string }>>;
     socialLinks?: EntryFieldTypes.Object<Record<string, string>>;
+    heroTitle?: EntryFieldTypes.Symbol;
+    heroBio?: EntryFieldTypes.Text;
+    sidebarBio?: EntryFieldTypes.Symbol;
+    skills?: EntryFieldTypes.Object<SkillGroup[]>;
+    attributes?: EntryFieldTypes.Object<string[]>;
   };
 };
 

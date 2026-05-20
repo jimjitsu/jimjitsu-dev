@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { contentful, getAllBlogPosts, type AuthorSkeleton, type ProjectSkeleton } from "@/lib/contentful";
+import { contentful, getAllBlogPosts, getSiteSettings, type AuthorSkeleton, type ProjectSkeleton, type SkillGroup } from "@/lib/contentful";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { ProjectCard } from "@/components/project-card";
 import { BlogPostCard } from "@/components/blog-post-card";
@@ -13,14 +13,28 @@ import {
 
 export const revalidate = 60;
 
-const SKILL_GROUPS = [
+const FALLBACK_HERO_TITLE = "Frontend developer";
+
+const FALLBACK_HERO_BIO =
+  "I specialize in frontend development with an eye for detail and an understanding of creative concerns, design systems, responsive designed sites, and developing with a focus on web performance and accessibility. Progressive enhancement, incremental improvements, and mobile-first development are my jam, I enjoy hard problems, and love elegant solutions.";
+
+const FALLBACK_SKILLS: SkillGroup[] = [
   { label: "Languages", items: ["HTML", "CSS", "JavaScript", "TypeScript"] },
   { label: "Frameworks", items: ["React", "Next.js", "Vue", "Svelte", "jQuery"] },
   { label: "Styling", items: ["Tailwind CSS", "Bootstrap", "Foundation"] },
   { label: "Tooling", items: ["Webpack", "Node.js", "npm", "Grunt", "Gulp", "GSAP", "Git"] },
   { label: "CMS", items: ["Contentful", "Kentico", "Sitecore", "Wordpress"] },
   { label: "AI", items: ["Claude Code", "Cursor", "GitHub Copilot"] },
-] as const;
+];
+
+const FALLBACK_ATTRIBUTES: string[] = [
+  "Design systems development and governance",
+  "Web performance optimization",
+  "Accessibility (WCAG 2.1 AA)",
+  "Agile / user story refinement",
+  "Cross-functional collaboration with UX and design",
+  "Freelance developer hiring and management",
+];
 
 /**
  * Home page.
@@ -28,7 +42,7 @@ const SKILL_GROUPS = [
  * Inner content centers via mx-auto + max-w-* (spec §6.2).
  */
 export default async function HomePage() {
-  const [{ items: featuredProjects }, { items: recentPosts }, { items: authors }] =
+  const [{ items: featuredProjects }, { items: recentPosts }, { items: authors }, settings] =
     await Promise.all([
       contentful.getEntries<ProjectSkeleton>({
         content_type: "project",
@@ -38,6 +52,7 @@ export default async function HomePage() {
       }),
       getAllBlogPosts().then((res) => ({ items: res.items.slice(0, 3) })),
       contentful.getEntries<AuthorSkeleton>({ content_type: "author", limit: 1 }),
+      getSiteSettings(),
     ]);
 
   // Use the first paragraph of the author bio as the home snapshot blurb.
@@ -46,7 +61,10 @@ export default async function HomePage() {
   return (
     <main>
       <Section bg="base">
-        <HeroSection />
+        <HeroSection
+          title={settings?.fields.heroTitle ?? FALLBACK_HERO_TITLE}
+          bio={settings?.fields.heroBio ?? FALLBACK_HERO_BIO}
+        />
       </Section>
 
       <Section bg="surface">
@@ -62,7 +80,10 @@ export default async function HomePage() {
       </Section>
 
       <Section bg="surface">
-        <SkillsSection />
+        <SkillsSection
+          skills={settings?.fields.skills ?? FALLBACK_SKILLS}
+          attributes={settings?.fields.attributes ?? FALLBACK_ATTRIBUTES}
+        />
       </Section>
 
       <Section bg="base">
@@ -85,7 +106,7 @@ function Section({ children, bg }: { children: React.ReactNode; bg: "base" | "su
   );
 }
 
-function HeroSection() {
+function HeroSection({ title, bio }: { title: string; bio: string }) {
   return (
     <section aria-labelledby="hero-heading" className="relative flex flex-col gap-6">
       {/* Decorative starburst floats behind the heading at low opacity. */}
@@ -99,10 +120,10 @@ function HeroSection() {
         Jim Tierney
       </p>
       <h1 id="hero-heading" className="display-heading">
-        Frontend developer
+        {title}
       </h1>
       <p className="max-w-2xl text-base leading-relaxed text-ink-muted">
-        I specialize in frontend development with an eye for detail and an understanding of creative concerns, design systems, responsive designed sites, and developing with a focus on web performance and accessibility. Progressive enhancement, incremental improvements, and mobile-first development are my jam, I enjoy hard problems, and love elegant solutions.
+        {bio}
       </p>
       <div className="flex flex-wrap gap-4">
         <Link href="/projects" className="btn-primary">
@@ -231,7 +252,7 @@ function RecentWritingSection({
   );
 }
 
-function SkillsSection() {
+function SkillsSection({ skills, attributes }: { skills: SkillGroup[]; attributes: string[] }) {
   return (
     <section aria-labelledby="skills-heading" className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -245,7 +266,7 @@ function SkillsSection() {
       </div>
 
       <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {SKILL_GROUPS.map(({ label, items }) => (
+        {skills.map(({ label, items }) => (
           <div key={label} className="flex flex-col gap-3 border-2 border-ink p-4">
             <dt className="eyebrow-sm">{label}</dt>
             <dd>
@@ -265,12 +286,9 @@ function SkillsSection() {
       </dl>
 
       <ul className="grid gap-2 text-sm text-ink-muted sm:grid-cols-2">
-        <li>Design systems development and governance</li>
-        <li>Web performance optimization</li>
-        <li>Accessibility (WCAG 2.1 AA)</li>
-        <li>Agile / user story refinement</li>
-        <li>Cross-functional collaboration with UX and design</li>
-        <li>Freelance developer hiring and management</li>
+        {attributes.map((attr) => (
+          <li key={attr}>{attr}</li>
+        ))}
       </ul>
     </section>
   );

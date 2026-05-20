@@ -41,7 +41,8 @@ export async function Sidebar() {
             Jim Tierney
           </p>
           <p className="text-sm leading-snug text-ink-muted">
-            Frontend developer, jiu jitsu practitioner, and occasional artist of the non-martial variety in Milwaukee, WI
+            {settings?.fields.sidebarBio ??
+              "Frontend developer, jiu jitsu practitioner, and occasional artist of the non-martial variety in Milwaukee, WI"}
           </p>
         </div>
 
