@@ -319,7 +319,7 @@ export function ChatWidget() {
       <button
         type="button"
         onClick={() => setOpen(false)}
-        aria-label="Close chat"
+        aria-label="Dismiss"
         tabIndex={open ? 0 : -1}
         className={`fixed inset-0 z-30 bg-ink/20 transition-opacity ${
           open ? "opacity-100" : "pointer-events-none opacity-0"

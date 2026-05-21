@@ -12,7 +12,7 @@ const FALLBACK_NAV = [
 
 export async function Sidebar() {
   const settings = await getSiteSettings();
-  const navLinks = settings?.fields.navLinks ?? FALLBACK_NAV;
+  const navLinks = settings?.fields.navLinks?.length ? settings.fields.navLinks : FALLBACK_NAV;
   const social = settings?.fields.socialLinks ?? {};
   const socialEntries = Object.entries(social);
 
