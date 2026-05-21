@@ -12,10 +12,10 @@ test.describe("Homepage", () => {
   test("has primary navigation with expected links", async ({ page }) => {
     const nav = page.getByRole("navigation", { name: "Primary" });
     await expect(nav).toBeVisible();
-    await expect(nav.getByRole("link", { name: /home/i })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /projects/i })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /blog/i })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /about/i })).toBeVisible();
+    // Test by href (code-defined routes) rather than label (CMS content that can vary)
+    await expect(nav.locator('a[href="/projects"]')).toBeVisible();
+    await expect(nav.locator('a[href="/blog"]')).toBeVisible();
+    await expect(nav.locator('a[href="/about"]')).toBeVisible();
   });
 
   test('has "See projects" CTA link', async ({ page }) => {
