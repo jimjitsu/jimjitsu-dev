@@ -12,7 +12,7 @@ export function SkillGroup({ label, items }: SkillGroupProps) {
           {items.map((item) => (
             <li
               key={item}
-              className="border border-ink px-2 py-0.5 font-eyebrow text-xs tracking-[0.04em] text-ink"
+              className="bg-amber/20 border border-amber px-2 py-0.5 font-eyebrow text-xs tracking-[0.04em] text-ink"
             >
               {item}
             </li>

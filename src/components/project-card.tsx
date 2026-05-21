@@ -41,7 +41,7 @@ export function ProjectCard({ project, accent = "red" }: ProjectCardProps) {
         {technologies && technologies.length > 0 && (
           <ul className="flex flex-wrap gap-2 font-eyebrow text-xs tracking-[0.04em]">
             {technologies.map((tech) => (
-              <li key={tech} className="border border-ink px-2 py-0.5 text-ink">
+              <li key={tech} className="bg-amber/20 border border-amber px-2 py-0.5 text-ink">
                 {tech}
               </li>
             ))}

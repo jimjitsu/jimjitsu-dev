@@ -315,6 +315,17 @@ export function ChatWidget() {
         </button>
       )}
 
+      {/* Backdrop — always rendered so opacity transition works */}
+      <button
+        type="button"
+        onClick={() => setOpen(false)}
+        aria-label="Close chat"
+        tabIndex={open ? 0 : -1}
+        className={`fixed inset-0 z-30 bg-ink/20 transition-opacity ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+
       {/* Chat panel */}
       {open && (
         <div
