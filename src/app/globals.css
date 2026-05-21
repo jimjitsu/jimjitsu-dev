@@ -76,11 +76,16 @@
 
   /* Brutalist primary button — red bg, ink border. */
   .btn-primary {
-    @apply inline-flex items-center gap-2 border-2 border-ink bg-red px-5 py-3 font-eyebrow text-sm font-bold tracking-[0.04em] text-base transition hover:-translate-y-0.5 hover:bg-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-base;
+    @apply inline-flex items-center gap-2 border-2 border-ink bg-red px-5 py-3 font-eyebrow text-sm font-bold tracking-[0.04em] transition hover:-translate-y-0.5 hover:bg-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-base;
+    color: rgb(var(--color-base));
   }
 
   /* Secondary button — outlined, ink on base. */
   .btn-secondary {
-    @apply inline-flex items-center gap-2 border-2 border-ink bg-transparent px-5 py-3 font-eyebrow text-sm font-bold tracking-[0.04em] text-ink transition hover:-translate-y-0.5 hover:bg-ink hover:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-base;
+    @apply inline-flex items-center gap-2 border-2 border-ink bg-transparent px-5 py-3 font-eyebrow text-sm font-bold tracking-[0.04em] text-ink transition hover:-translate-y-0.5 hover:bg-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-base;
+  }
+
+  .btn-secondary:hover {
+    color: rgb(var(--color-base));
   }
 }
