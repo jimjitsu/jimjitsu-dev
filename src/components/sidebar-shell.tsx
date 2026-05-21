@@ -21,6 +21,7 @@ export function SidebarShell({ children }: SidebarShellProps) {
 
   // Auto-close on route change so navigation feels responsive on mobile.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(false);
   }, [pathname]);
 
