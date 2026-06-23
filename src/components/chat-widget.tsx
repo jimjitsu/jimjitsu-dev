@@ -29,12 +29,12 @@ interface ApiResponse {
 /* -------------------------------------------------------------------------- */
 
 const WELCOME =
-  "Yeah, I'm Jimbo-t. Digital version of Jim Tierney. Ask me about the career, the projects, the whole... what-have-you. That's just, like, what I'm here for, man.";
+  "Name's Jimbo-t — Jim Tierney's digital twin, here to talk you through the man's career. Projects, skills, the whole... what-have-you. Ask me anything about Jim.";
 
 const SUGGESTIONS = [
-  "What are your strongest skills?",
-  "Walk me through a project you're proud of.",
-  "What's your approach to building design systems?",
+  "What are Jim's strongest skills?",
+  "Walk me through a project Jim's proud of.",
+  "What's Jim's approach to design systems?",
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -309,7 +309,7 @@ export function ChatWidget() {
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open chat with Jimbo-t"
-          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center border-2 border-ink bg-teal text-base shadow-[3px_3px_0_0_rgb(var(--color-ink))] transition hover:-translate-y-0.5 lg:bottom-8 lg:right-8"
+          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center border-2 border-ink bg-teal text-[rgb(var(--color-base))] shadow-[3px_3px_0_0_rgb(var(--color-ink))] transition hover:-translate-y-0.5 lg:bottom-8 lg:right-8"
         >
           <ChatBubbleIcon size={20} />
         </button>
@@ -374,7 +374,7 @@ export function ChatWidget() {
                     key={s}
                     type="button"
                     onClick={() => void sendMessage(s)}
-                    className="border border-ink bg-surface px-3 py-1.5 font-mono text-xs text-ink transition-colors hover:bg-ink hover:text-base"
+                    className="border border-ink bg-surface px-3 py-1.5 font-mono text-xs text-ink transition-colors hover:bg-ink hover:text-[rgb(var(--color-base))]"
                   >
                     {s}
                   </button>

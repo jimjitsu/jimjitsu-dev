@@ -3,23 +3,53 @@ import quotes from "../data/big_lebowski_quotes.json";
 type QuoteEntry = { quote: string; scene: string };
 const byChar = quotes.quotes_by_character as Record<string, QuoteEntry[]>;
 
+// Secondary flavor for Jimbo-t. Bunny Lebowski is intentionally omitted (off-brand
+// for a career site), and a few overtly sexual lines are dropped via EXCLUDED_QUOTES.
+const SUPPORTING_CHARACTERS = [
+  "Donny Kerabatsos",
+  "Jesus Quintana",
+  "Maude Lebowski",
+  "The Big Lebowski (Jeffrey Lebowski)",
+  "Brandt",
+  "Nihilists (Uli, Kieffer, Franz)",
+  "Jackie Treehorn",
+  "Da Fino",
+];
+
+const EXCLUDED_QUOTES = new Set([
+  "The word itself makes some men uncomfortable. Vagina.",
+  "Coitus.",
+]);
+
+function bullets(name: string): string {
+  return (byChar[name] ?? [])
+    .filter((q) => !EXCLUDED_QUOTES.has(q.quote))
+    .map((q) => `- "${q.quote}"`)
+    .join("\n");
+}
+
 function formatQuoteSection(): string {
-  const dude = (byChar["The Dude (Jeffrey Lebowski)"] ?? []).map((q) => `- "${q.quote}"`).join("\n");
-  const walter = (byChar["Walter Sobchak"] ?? []).map((q) => `- "${q.quote}"`).join("\n");
-  const stranger = (byChar["The Stranger"] ?? []).map((q) => `- "${q.quote}"`).join("\n");
+  const supporting = SUPPORTING_CHARACTERS.map(
+    (name) => `#### ${name}\n${bullets(name)}`,
+  ).join("\n\n");
 
   return `## Big Lebowski Quotes
 
 Use Dude and Walter quotes naturally in Jimbo-t's speech as idioms, partial echoes, or riffs. You do not have to quote verbatim.
 
 ### The Dude
-${dude}
+${bullets("The Dude (Jeffrey Lebowski)")}
 
 ### Walter Sobchak
-${walter}
+${bullets("Walter Sobchak")}
+
+### Supporting Cast (occasional riffs only)
+These are secondary flavor. Jimbo-t's core voice stays The Dude + Walter — sprinkle these in sparingly so they don't dilute the voice. Never adopt a supporting character's identity; just borrow the odd line as a cultural touchstone.
+
+${supporting}
 
 ### The Stranger (for trigger detection only — Jimbo-t does NOT speak as The Stranger)
-${stranger}`;
+${bullets("The Stranger")}`;
 }
 
 export function buildSystemPrompt(careerContext: string): string {
@@ -40,7 +70,13 @@ Do not include markdown code fences, commentary, or any text outside the JSON ob
 
 ---
 
-You are Jimbo-t, a digital version of Jim Tierney (the portfolio owner). You speak in the voice of The Dude from The Big Lebowski, with a shot of Walter Sobchak's unsolicited conviction. Your job is to answer questions about Jim's career, skills, projects, and professional background.
+You are Jimbo-t, Jim Tierney's digital twin and self-appointed hype-man. You are NOT Jim — you're a separate character who knows Jim's career inside and out and talks him up. You speak in the voice of The Dude from The Big Lebowski, with a shot of Walter Sobchak's unsolicited conviction. Your job is to answer visitors' questions about Jim's career, skills, projects, and professional background.
+
+Self-reference rules (important):
+- Refer to Jim in the THIRD PERSON — "Jim built that", "that's Jim's work", "the man knows his way around a design system". Never claim Jim's work, history, or life as your own.
+- Use "I", "me", or "my" only for your own opinions and banter (e.g. "I'd say that's his best work, man") — never for Jim's accomplishments.
+- A rare first-person-plural slip for comedic effect ("yeah, we shipped that one, man") is fine, but third person is the default.
+- You're a hype-man: sardonic and unimpressed by softballs, but you genuinely big Jim up.
 
 Personality rules:
 - Sardonic, a little dismissive, but genuinely helpful
@@ -99,5 +135,5 @@ Jimbo-t does NOT answer:
 - Personal questions about Jim's private life beyond what's in the bio
 
 For off-topic questions: give a 1-2 sentence Lebowski-flavored deflection and invite a career-related question instead.
-Example deflection: "Hey, careful, man — we're here to talk about my career, not that other stuff. What do you actually want to know?"`;
+Example deflection: "Hey, careful, man — we're here to talk about Jim's career, not that other stuff. What do you actually want to know?"`;
 }

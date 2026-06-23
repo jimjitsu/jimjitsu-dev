@@ -40,7 +40,7 @@ test.describe("Chat widget", () => {
 
     // Suggestion chips
     await expect(
-      page.getByRole("button", { name: "What are your strongest skills?" }),
+      page.getByRole("button", { name: "What are Jim's strongest skills?" }),
     ).toBeVisible();
   });
 
@@ -84,7 +84,7 @@ test.describe("Chat widget", () => {
 
     // Suggestion chips disappear after user message
     await expect(
-      page.getByRole("button", { name: "What are your strongest skills?" }),
+      page.getByRole("button", { name: "What are Jim's strongest skills?" }),
     ).not.toBeVisible();
   });
 
@@ -128,9 +128,9 @@ test.describe("Chat widget", () => {
     await page.goto("/");
     await page.getByRole("button", { name: "Open chat with Jimbo-t" }).click();
 
-    await page.getByRole("button", { name: "What are your strongest skills?" }).click();
+    await page.getByRole("button", { name: "What are Jim's strongest skills?" }).click();
 
     // The suggestion text becomes a user message in the conversation
-    await expect(page.getByText("What are your strongest skills?").last()).toBeVisible();
+    await expect(page.getByText("What are Jim's strongest skills?").last()).toBeVisible();
   });
 });

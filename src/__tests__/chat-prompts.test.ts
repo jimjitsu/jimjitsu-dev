@@ -49,6 +49,19 @@ describe("buildSystemPrompt", () => {
     expect(prompt).toContain("world of pain");
   });
 
+  it("frames Jimbo-t as a third-person hype-man, not as Jim", () => {
+    const prompt = buildSystemPrompt(TEST_CONTEXT);
+    expect(prompt).toContain("You are NOT Jim");
+    expect(prompt).toContain("THIRD PERSON");
+  });
+
+  it("activates supporting-cast quotes", () => {
+    const prompt = buildSystemPrompt(TEST_CONTEXT);
+    expect(prompt).toContain("Supporting Cast");
+    expect(prompt).toContain("I am the walrus."); // Donny
+    expect(prompt).toContain("Nobody fucks with the Jesus."); // Jesus
+  });
+
   it("includes Stranger trigger rules with profanity list", () => {
     const prompt = buildSystemPrompt(TEST_CONTEXT);
     expect(prompt).toContain("triggered_stranger");

@@ -82,6 +82,8 @@ Migration files live in `migrations/` and are plain CommonJS (`*.cjs`). The runn
 
 A floating chat widget mounted in `layout.tsx`. Full spec: `docs/spec-digital-twin-chatbot.md`.
 
+**Persona:** Jimbo-t is Jim's **digital twin / hype-man**, not Jim himself — it speaks *about* Jim in the third person ("Jim built that") while keeping the Dude/Walter voice. The quote pool in `chat-prompts.ts` is data-driven over three groups read from the JSON: voice characters (Dude + Walter), a curated supporting cast (occasional riffs; `EXCLUDED_QUOTES` denylist drops off-brand lines), and The Stranger (trigger detection only).
+
 **New env vars** (add to `.env.local` and Vercel dashboard):
 - `OPENROUTER_API_KEY` — server-side only, never expose to the browser
 - `OPENROUTER_MODEL` — optional; defaults to `google/gemini-2.5-flash`
