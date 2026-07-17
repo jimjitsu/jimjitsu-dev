@@ -15,7 +15,7 @@
     --color-ink-muted: 74 74 74; /* #4A4A4A  softer ink for body */
     --color-teal: 14 124 123; /* #0E7C7B  deep retro turquoise */
     --color-amber: 232 153 35; /* #E89923  bowling-pin mustard */
-    --color-red: 200 57 47; /* #C8392F  warm stripe red */
+    --color-red: 192 54 44; /* #C0362C  warm stripe red — darkened for AA contrast on .btn-primary */
     --color-pink: 255 111 168; /* #FF6FA8  neon-sign pink, sparingly */
   }
 

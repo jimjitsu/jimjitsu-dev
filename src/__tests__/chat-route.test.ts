@@ -197,7 +197,8 @@ describe("POST /api/chat — successful responses", () => {
     expect(body.code).toBe("llm_error");
   });
 
-  it("caps history at 10 turns and still returns 200", async () => {
+  it("caps history at 20 turns and truncates per-turn content in the outbound request", async () => {
+    delete process.env.OPENROUTER_MODEL; // exercise the default model
     mockFetch({
       choices: [
         {
@@ -214,13 +215,31 @@ describe("POST /api/chat — successful responses", () => {
       ],
     });
 
-    // Send 15 history turns (exceeds the 10-turn cap)
-    const history = Array.from({ length: 15 }, (_, i) => ({
+    // 30 turns of oversized content — exceeds both the 20-turn and per-turn caps.
+    const history = Array.from({ length: 30 }, (_, i) => ({
       role: i % 2 === 0 ? "user" : "assistant",
-      content: `Turn ${i}`,
+      content: "x".repeat(5000),
     }));
 
     const res = await POST(makeRequest({ message: "Still there?", history }));
     expect(res.status).toBe(200);
+
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const sent = JSON.parse(init.body as string) as {
+      model: string;
+      messages: { role: string; content: string }[];
+    };
+
+    // messages = system prompt + capped history + the new user message
+    const historyTurns = sent.messages.slice(1, -1);
+    expect(historyTurns).toHaveLength(20);
+    for (const turn of historyTurns) {
+      expect(turn.content.length).toBeLessThanOrEqual(2000);
+    }
+    expect(sent.model).toBe("google/gemini-2.5-flash");
+    expect((init.headers as Record<string, string>)["HTTP-Referer"]).toBe(
+      "https://www.jimjitsu.dev",
+    );
   });
 });

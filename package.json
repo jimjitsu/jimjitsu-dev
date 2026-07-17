@@ -17,6 +17,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "contentful:migrate": "node scripts/run-migration.cjs",
@@ -37,6 +38,7 @@
     "shiki": "^1.24.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.60.0",
     "@storybook/addon-docs": "^10.4.0",
     "@storybook/addon-themes": "^10.4.0",
@@ -45,6 +47,7 @@
     "@types/node": "^22.10.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.6",
     "autoprefixer": "^10.4.20",
     "contentful-cli": "^3.5.0",
     "eslint": "^9.17.0",
