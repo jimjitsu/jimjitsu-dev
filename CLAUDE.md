@@ -54,9 +54,11 @@ All pages live in `src/app/` using the Next.js App Router. The persistent sideba
 All CMS logic lives in `src/lib/contentful.ts`. Key patterns:
 
 - **TypeScript skeletons** (`ProjectSkeleton`, `BlogPostSkeleton`, etc.) mirror the content types defined in `migrations/0001-initial-content-types.cjs`. If you add a field in a migration, add it to the skeleton.
-- **Two clients** — `contentful` (delivery/published) and `contentfulPreview` (drafts). Always go through `getClient(draft?)` rather than importing clients directly, so pages can opt into preview mode.
-- The module **throws at init** if `CONTENTFUL_SPACE_ID` or `CONTENTFUL_DELIVERY_TOKEN` are absent. Copy `.env.local.example` to `.env.local` before running.
+- **Two clients** — delivery (published) and preview (drafts), both lazily created. Always go through `getClient(draft?)` rather than importing clients directly, so pages can opt into preview mode.
+- **Lazy init / graceful degradation** — importing the module never throws. `getClient()` returns `null` when the required env vars are absent, and the fetch helpers degrade to empty results (`{ items: [] }` / `null`). This lets `next build` and CI on Dependabot/fork PRs (which don't get repo secrets) succeed against a content-less CMS. Copy `.env.local.example` to `.env.local` for real content locally.
 - Environment vars use `CONTENTFUL_ENVIRONMENT` (defaults to `master`). The active environment for this project is `jimjitsu-dev`.
+
+**Draft Mode preview:** `/api/draft?secret=<CONTENTFUL_PREVIEW_SECRET>&slug=/blog/<slug>` enables Next.js Draft Mode (guarded by the secret) so the preview client serves drafts; `/api/draft/disable` exits. Content pages read `draftMode()` and pass `{ draft }` to the fetchers. Set Contentful's entry preview URL to the `/api/draft` endpoint.
 
 ### Static generation
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
 import { getAllBlogPosts } from "@/lib/contentful";
 import { BlogPostCard } from "@/components/blog-post-card";
 import { BowlingPinIcon } from "@/components/icons";
@@ -13,7 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogIndexPage() {
-  const { items: posts } = await getAllBlogPosts();
+  const { isEnabled: draft } = await draftMode();
+  const { items: posts } = await getAllBlogPosts({ draft });
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-4xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">

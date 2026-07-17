@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 import { getAllProjects, getProjectBySlug, resolveAssetUrl } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
@@ -53,7 +54,8 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
 export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug);
+  const { isEnabled: draft } = await draftMode();
+  const project = await getProjectBySlug(slug, { draft });
   if (!project) notFound();
 
   const { title, summary, coverImage, role, technologies, liveUrl, repoUrl, body } = project.fields;
