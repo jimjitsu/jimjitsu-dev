@@ -122,21 +122,21 @@ Save → **Publish**.
 
 For each project, **Content → Add entry → Project**. Field reference:
 
-| Field | Notes |
-|---|---|
-| Title | Plain text |
-| Slug | Lowercase, hyphens only — e.g. `visit-utah` |
-| Summary | One-line card description |
-| Cover image | Upload to media |
-| Gallery | Optional — additional screenshots |
-| Role | "Lead Frontend Developer" |
-| Technologies | Array of short strings |
-| Live URL | The deployed site URL |
-| Repo URL | Optional |
-| Body | Long-form markdown case study |
-| Featured | `true` for any you want surfaced on the home page |
-| Publish date | When it shipped |
-| Sort order | Optional manual override; lower = earlier in lists |
+| Field        | Notes                                              |
+| ------------ | -------------------------------------------------- |
+| Title        | Plain text                                         |
+| Slug         | Lowercase, hyphens only — e.g. `visit-utah`        |
+| Summary      | One-line card description                          |
+| Cover image  | Upload to media                                    |
+| Gallery      | Optional — additional screenshots                  |
+| Role         | "Lead Frontend Developer"                          |
+| Technologies | Array of short strings                             |
+| Live URL     | The deployed site URL                              |
+| Repo URL     | Optional                                           |
+| Body         | Long-form markdown case study                      |
+| Featured     | `true` for any you want surfaced on the home page  |
+| Publish date | When it shipped                                    |
+| Sort order   | Optional manual override; lower = earlier in lists |
 
 The three to create (per spec §14.1): **Visit Utah**, **Medical College of Wisconsin**, **Snow Basin & Sun Valley**.
 
@@ -144,18 +144,18 @@ The three to create (per spec §14.1): **Visit Utah**, **Medical College of Wisc
 
 **Content → Add entry → Blog post**.
 
-| Field | Notes |
-|---|---|
-| Title | Plain text |
-| Slug | Lowercase, hyphens only |
-| Excerpt | Used on cards and meta description |
-| Cover image | Optional |
-| Body | Markdown — supports code blocks with syntax highlighting at render time |
-| Tags | Array of strings |
-| Publish date | Required — drives ordering and is shown on the post |
-| Author | Link to the Author entry from 5a |
-| Canonical URL | Only fill if cross-posting from elsewhere |
-| Featured | Optional |
+| Field         | Notes                                                                   |
+| ------------- | ----------------------------------------------------------------------- |
+| Title         | Plain text                                                              |
+| Slug          | Lowercase, hyphens only                                                 |
+| Excerpt       | Used on cards and meta description                                      |
+| Cover image   | Optional                                                                |
+| Body          | Markdown — supports code blocks with syntax highlighting at render time |
+| Tags          | Array of strings                                                        |
+| Publish date  | Required — drives ordering and is shown on the post                     |
+| Author        | Link to the Author entry from 5a                                        |
+| Canonical URL | Only fill if cross-posting from elsewhere                               |
+| Featured      | Optional                                                                |
 
 The two to create: **Building this portfolio site**, **Building a Fortnite map**. Both can start as drafts.
 

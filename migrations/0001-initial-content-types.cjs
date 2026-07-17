@@ -97,11 +97,7 @@ module.exports = function (migration) {
 
   project.createField("publishDate").name("Publish date").type("Date").required(false);
 
-  project
-    .createField("order")
-    .name("Sort order")
-    .type("Integer")
-    .required(false);
+  project.createField("order").name("Sort order").type("Integer").required(false);
 
   // Set the markdown editor for the body field in the Contentful UI.
   project.changeFieldControl("body", "builtin", "markdown");
@@ -136,18 +132,9 @@ module.exports = function (migration) {
     .linkType("Asset")
     .required(false);
 
-  blogPost
-    .createField("body")
-    .name("Body (markdown)")
-    .type("Text")
-    .required(true);
+  blogPost.createField("body").name("Body (markdown)").type("Text").required(true);
 
-  blogPost
-    .createField("tags")
-    .name("Tags")
-    .type("Array")
-    .items({ type: "Symbol" })
-    .required(false);
+  blogPost.createField("tags").name("Tags").type("Array").items({ type: "Symbol" }).required(false);
 
   blogPost.createField("publishDate").name("Publish date").type("Date").required(true);
 
@@ -159,11 +146,7 @@ module.exports = function (migration) {
     .validations([{ linkContentType: ["author"] }])
     .required(false);
 
-  blogPost
-    .createField("canonicalUrl")
-    .name("Canonical URL")
-    .type("Symbol")
-    .required(false);
+  blogPost.createField("canonicalUrl").name("Canonical URL").type("Symbol").required(false);
 
   blogPost.createField("featured").name("Featured").type("Boolean").required(false);
 
@@ -200,11 +183,7 @@ module.exports = function (migration) {
     .type("Object") // JSON: [{ label, href }]
     .required(false);
 
-  siteSettings
-    .createField("footerLinks")
-    .name("Footer links")
-    .type("Object")
-    .required(false);
+  siteSettings.createField("footerLinks").name("Footer links").type("Object").required(false);
 
   siteSettings
     .createField("socialLinks")

@@ -19,7 +19,7 @@
 - **Timeline:** [e.g., Jan 2025 – Apr 2025]
 - **Status:** [Shipped / In progress / Archived]
 
-If the project was collaborative, name what *you* owned.
+If the project was collaborative, name what _you_ owned.
 
 ## Tech Stack
 
@@ -41,7 +41,7 @@ If the project was collaborative, name what *you* owned.
 
 ## Key Features & Implementation Highlights
 
-Pick 3–5 things that show your craft. For each, briefly explain *what* and *why*.
+Pick 3–5 things that show your craft. For each, briefly explain _what_ and _why_.
 
 ### [Feature 1 — e.g., Virtualized data grid]
 
@@ -91,4 +91,4 @@ If you can't share metrics, describe qualitative wins (user feedback, internal a
 
 ---
 
-*Posted [Date] · [Tags: react, performance, accessibility]*
+_Posted [Date] · [Tags: react, performance, accessibility]_

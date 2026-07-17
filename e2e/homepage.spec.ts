@@ -23,9 +23,7 @@ test.describe("Homepage", () => {
   });
 
   test("has chat trigger button", async ({ page }) => {
-    await expect(
-      page.getByRole("button", { name: "Open chat with Jimbo-t" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open chat with Jimbo-t" })).toBeVisible();
   });
 
   test("has no broken page error", async ({ page }) => {

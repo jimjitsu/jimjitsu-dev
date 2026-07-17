@@ -26,13 +26,7 @@ export const skillGroups = [
   },
   {
     label: "Craft",
-    items: [
-      "GSAP animation",
-      "Web performance",
-      "Accessibility",
-      "Design systems",
-      "Agile / Jira",
-    ],
+    items: ["GSAP animation", "Web performance", "Accessibility", "Design systems", "Agile / Jira"],
   },
 ];
 

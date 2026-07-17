@@ -1,0 +1,18 @@
+# Dependencies & build output
+node_modules
+.next
+out
+build
+storybook-static
+
+# Test & coverage artifacts
+playwright-report
+test-results
+coverage
+
+# Generated lockfile
+pnpm-lock.yaml
+
+# Static/binary assets (nothing here needs formatting)
+public
+.storybook/public

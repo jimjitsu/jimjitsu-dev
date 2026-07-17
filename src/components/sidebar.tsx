@@ -37,9 +37,7 @@ export async function Sidebar() {
       <div className="flex flex-1 flex-col px-6 pb-8 pt-6">
         {/* Intro line. */}
         <div className="flex flex-col gap-1.5">
-          <p className="font-display text-3xl leading-none tracking-tight text-ink">
-            Jim Tierney
-          </p>
+          <p className="font-display text-3xl leading-none tracking-tight text-ink">Jim Tierney</p>
           <p className="text-sm leading-snug text-ink-muted">
             {settings?.fields.sidebarBio ??
               "Frontend developer, jiu jitsu practitioner, and occasional artist of the non-martial variety in Milwaukee, WI"}
