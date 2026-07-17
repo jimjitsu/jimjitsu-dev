@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCareerContext } from "@/lib/chat-context";
 import { buildSystemPrompt } from "@/lib/chat-prompts";
+import { SITE_URL } from "@/lib/constants";
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                       */
@@ -183,7 +184,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ChatResponse 
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://jimjitsu.dev",
+        "HTTP-Referer": SITE_URL,
         "X-Title": "jimjitsu-digital-twin",
       },
       body: JSON.stringify({
