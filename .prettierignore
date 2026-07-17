@@ -16,3 +16,6 @@ pnpm-lock.yaml
 # Static/binary assets (nothing here needs formatting)
 public
 .storybook/public
+
+# Claude Code local settings (untracked, machine-specific)
+.claude/settings.local.json
