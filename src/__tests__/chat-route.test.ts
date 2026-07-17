@@ -17,10 +17,7 @@ const { POST } = await import("@/app/api/chat/route");
 /* Helpers                                                                     */
 /* -------------------------------------------------------------------------- */
 
-function makeRequest(
-  body: unknown,
-  headers: Record<string, string> = {},
-): NextRequest {
+function makeRequest(body: unknown, headers: Record<string, string> = {}): NextRequest {
   return new NextRequest("http://localhost:3000/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json", ...headers },
@@ -48,21 +45,21 @@ describe("POST /api/chat — input validation", () => {
   it("returns 400 when message field is absent", async () => {
     const res = await POST(makeRequest({}));
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe("validation_error");
   });
 
   it("returns 400 when message is an empty string", async () => {
     const res = await POST(makeRequest({ message: "  " }));
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe("validation_error");
   });
 
   it("returns 400 when message exceeds 500 characters", async () => {
     const res = await POST(makeRequest({ message: "a".repeat(501) }));
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe("validation_error");
   });
 
@@ -93,7 +90,7 @@ describe("POST /api/chat — API key check", () => {
   it("returns 500 when OPENROUTER_API_KEY is absent", async () => {
     const res = await POST(makeRequest({ message: "Hello" }));
     expect(res.status).toBe(500);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe("llm_error");
   });
 });
@@ -128,7 +125,10 @@ describe("POST /api/chat — successful responses", () => {
     const res = await POST(makeRequest({ message: "Tell me about React" }));
     expect(res.status).toBe(200);
 
-    const body = await res.json() as { jimbot: { text: string; triggered_stranger: boolean }; stranger?: unknown };
+    const body = (await res.json()) as {
+      jimbot: { text: string; triggered_stranger: boolean };
+      stranger?: unknown;
+    };
     expect(body.jimbot.text).toBe("Yeah, React is kind of my thing, man.");
     expect(body.jimbot.triggered_stranger).toBe(false);
     expect(body.stranger).toBeUndefined();
@@ -157,7 +157,7 @@ describe("POST /api/chat — successful responses", () => {
     const res = await POST(makeRequest({ message: "What stack do you use?" }));
     expect(res.status).toBe(200);
 
-    const body = await res.json() as {
+    const body = (await res.json()) as {
       jimbot: { triggered_stranger: boolean };
       stranger?: { text: string };
     };
@@ -166,13 +166,16 @@ describe("POST /api/chat — successful responses", () => {
   });
 
   it("strips markdown code fences from LLM response", async () => {
-    const rawWithFences = "```json\n" + JSON.stringify({
-      jimbot: {
-        text: "New shit has come to light.",
-        triggered_stranger: false,
-        trigger_type: null,
-      },
-    }) + "\n```";
+    const rawWithFences =
+      "```json\n" +
+      JSON.stringify({
+        jimbot: {
+          text: "New shit has come to light.",
+          triggered_stranger: false,
+          trigger_type: null,
+        },
+      }) +
+      "\n```";
 
     mockFetch({
       choices: [{ message: { content: rawWithFences } }],
@@ -181,7 +184,7 @@ describe("POST /api/chat — successful responses", () => {
     const res = await POST(makeRequest({ message: "Any updates?" }));
     expect(res.status).toBe(200);
 
-    const body = await res.json() as { jimbot: { text: string } };
+    const body = (await res.json()) as { jimbot: { text: string } };
     expect(body.jimbot.text).toBe("New shit has come to light.");
   });
 
@@ -190,11 +193,12 @@ describe("POST /api/chat — successful responses", () => {
 
     const res = await POST(makeRequest({ message: "Hello" }));
     expect(res.status).toBe(502);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe("llm_error");
   });
 
-  it("caps history at 10 turns and still returns 200", async () => {
+  it("caps history at 20 turns and truncates per-turn content in the outbound request", async () => {
+    delete process.env.OPENROUTER_MODEL; // exercise the default model
     mockFetch({
       choices: [
         {
@@ -211,13 +215,31 @@ describe("POST /api/chat — successful responses", () => {
       ],
     });
 
-    // Send 15 history turns (exceeds the 10-turn cap)
-    const history = Array.from({ length: 15 }, (_, i) => ({
+    // 30 turns of oversized content — exceeds both the 20-turn and per-turn caps.
+    const history = Array.from({ length: 30 }, (_, i) => ({
       role: i % 2 === 0 ? "user" : "assistant",
-      content: `Turn ${i}`,
+      content: "x".repeat(5000),
     }));
 
     const res = await POST(makeRequest({ message: "Still there?", history }));
     expect(res.status).toBe(200);
+
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const sent = JSON.parse(init.body as string) as {
+      model: string;
+      messages: { role: string; content: string }[];
+    };
+
+    // messages = system prompt + capped history + the new user message
+    const historyTurns = sent.messages.slice(1, -1);
+    expect(historyTurns).toHaveLength(20);
+    for (const turn of historyTurns) {
+      expect(turn.content.length).toBeLessThanOrEqual(2000);
+    }
+    expect(sent.model).toBe("google/gemini-2.5-flash");
+    expect((init.headers as Record<string, string>)["HTTP-Referer"]).toBe(
+      "https://www.jimjitsu.dev",
+    );
   });
 });

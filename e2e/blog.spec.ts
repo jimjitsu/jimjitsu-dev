@@ -10,10 +10,8 @@ test.describe("Blog", () => {
     await page.goto("/blog");
 
     const postLink = page.locator('a[href^="/blog/"]').first();
-    if ((await postLink.count()) === 0) {
-      // No posts in Contentful yet — nothing to follow.
-      return;
-    }
+    // Surface an empty CMS as a visible skip instead of a silent green pass.
+    test.skip((await postLink.count()) === 0, "No blog posts in Contentful — nothing to follow");
 
     const href = await postLink.getAttribute("href");
     if (!href) return;

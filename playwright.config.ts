@@ -18,9 +18,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev",
+    // In CI, exercise the production server (matches what deploys). The CI job
+    // runs `pnpm build` first, so `pnpm start` has artifacts to serve. Locally
+    // we use the dev server and reuse an already-running one.
+    command: process.env.CI ? "pnpm start" : "pnpm dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
+    timeout: 120_000,
   },
 });

@@ -9,26 +9,26 @@
  * --------------------------------------------------------------------------*/
 @layer base {
   :root {
-    --color-base: 245 239 224;        /* #F5EFE0  warm bone — page background */
-    --color-surface: 234 226 208;     /* #EAE2D0  slightly darker bone — alt section bg */
-    --color-ink: 26 26 26;            /* #1A1A1A  near-black */
-    --color-ink-muted: 74 74 74;      /* #4A4A4A  softer ink for body */
-    --color-teal: 14 124 123;         /* #0E7C7B  deep retro turquoise */
-    --color-amber: 232 153 35;        /* #E89923  bowling-pin mustard */
-    --color-red: 200 57 47;           /* #C8392F  warm stripe red */
-    --color-pink: 255 111 168;        /* #FF6FA8  neon-sign pink, sparingly */
+    --color-base: 245 239 224; /* #F5EFE0  warm bone — page background */
+    --color-surface: 234 226 208; /* #EAE2D0  slightly darker bone — alt section bg */
+    --color-ink: 26 26 26; /* #1A1A1A  near-black */
+    --color-ink-muted: 74 74 74; /* #4A4A4A  softer ink for body */
+    --color-teal: 14 124 123; /* #0E7C7B  deep retro turquoise */
+    --color-amber: 232 153 35; /* #E89923  bowling-pin mustard */
+    --color-red: 192 54 44; /* #C0362C  warm stripe red — darkened for AA contrast on .btn-primary */
+    --color-pink: 255 111 168; /* #FF6FA8  neon-sign pink, sparingly */
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --color-base: 21 17 13;         /* #15110D  stained alley floor */
-      --color-surface: 31 26 20;      /* #1F1A14  slightly lifted alt bg */
-      --color-ink: 245 239 224;       /* #F5EFE0  bone, inverted */
+      --color-base: 21 17 13; /* #15110D  stained alley floor */
+      --color-surface: 31 26 20; /* #1F1A14  slightly lifted alt bg */
+      --color-ink: 245 239 224; /* #F5EFE0  bone, inverted */
       --color-ink-muted: 184 176 160; /* #B8B0A0 */
-      --color-teal: 63 181 179;       /* #3FB5B3  lifted */
-      --color-amber: 255 200 87;      /* #FFC857 */
-      --color-red: 229 91 71;         /* #E55B47 */
-      --color-pink: 255 143 190;      /* #FF8FBE */
+      --color-teal: 63 181 179; /* #3FB5B3  lifted */
+      --color-amber: 255 200 87; /* #FFC857 */
+      --color-red: 229 91 71; /* #E55B47 */
+      --color-pink: 255 143 190; /* #FF8FBE */
     }
   }
 

@@ -22,9 +22,7 @@ const MOCK_WITH_STRANGER = {
 test.describe("Chat widget", () => {
   test("trigger button is visible on homepage", async ({ page }) => {
     await page.goto("/");
-    await expect(
-      page.getByRole("button", { name: "Open chat with Jimbo-t" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open chat with Jimbo-t" })).toBeVisible();
   });
 
   test("opens panel with welcome message and suggestion chips", async ({ page }) => {
@@ -104,7 +102,9 @@ test.describe("Chat widget", () => {
 
     // Jimbo-t response
     await expect(
-      page.getByText("Look, I don't give a shit what stack you're used to — I pick the right tool."),
+      page.getByText(
+        "Look, I don't give a shit what stack you're used to — I pick the right tool.",
+      ),
     ).toBeVisible();
 
     // Stranger response appears (wait up to 3s to account for the 800ms delay + transition)

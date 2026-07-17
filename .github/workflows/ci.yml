@@ -6,10 +6,23 @@ on:
   pull_request:
     branches: [main]
 
+# Cancel superseded runs on the same ref instead of letting them pile up.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CONTENTFUL_SPACE_ID: glsf6lviq3r0
+  CONTENTFUL_ENVIRONMENT: jimjitsu-dev
+
 jobs:
   check:
-    name: Typecheck, lint & unit tests
+    name: Typecheck, lint, format, unit & build
     runs-on: ubuntu-latest
+
+    env:
+      CONTENTFUL_DELIVERY_TOKEN: ${{ secrets.CONTENTFUL_DELIVERY_TOKEN }}
+      CONTENTFUL_PREVIEW_TOKEN: ${{ secrets.CONTENTFUL_PREVIEW_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -32,8 +45,17 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Format check
+        run: pnpm format:check
+
       - name: Unit tests
         run: pnpm test
+
+      - name: Build (production)
+        run: pnpm build
+
+      - name: Build Storybook
+        run: pnpm build-storybook
 
   e2e:
     name: Playwright e2e tests
@@ -41,11 +63,8 @@ jobs:
     needs: check
 
     env:
-      CONTENTFUL_SPACE_ID: glsf6lviq3r0
-      CONTENTFUL_ENVIRONMENT: jimjitsu-dev
       CONTENTFUL_DELIVERY_TOKEN: ${{ secrets.CONTENTFUL_DELIVERY_TOKEN }}
       CONTENTFUL_PREVIEW_TOKEN: ${{ secrets.CONTENTFUL_PREVIEW_TOKEN }}
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -62,10 +81,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Build so Playwright's webServer can run `next start` (the deployed path).
+      - name: Build (production)
+        run: pnpm build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run e2e tests
+      - name: Run e2e tests (production server)
         run: pnpm test:e2e
 
       - name: Upload Playwright report

@@ -40,7 +40,8 @@ export const LongTitle: Story = {
   args: {
     eyebrow: "Case study",
     title: "Enterprise Component Library Spanning Four Products and Three Design Systems.",
-    description: "A deep dive into the technical and organizational challenges of building at scale.",
+    description:
+      "A deep dive into the technical and organizational challenges of building at scale.",
   },
 };
 

@@ -13,35 +13,15 @@
 module.exports = function (migration) {
   const siteSettings = migration.editContentType("siteSettings");
 
-  siteSettings
-    .createField("heroTitle")
-    .name("Hero title")
-    .type("Symbol")
-    .required(false);
+  siteSettings.createField("heroTitle").name("Hero title").type("Symbol").required(false);
 
-  siteSettings
-    .createField("heroBio")
-    .name("Hero bio")
-    .type("Text")
-    .required(false);
+  siteSettings.createField("heroBio").name("Hero bio").type("Text").required(false);
 
-  siteSettings
-    .createField("sidebarBio")
-    .name("Sidebar bio")
-    .type("Symbol")
-    .required(false);
+  siteSettings.createField("sidebarBio").name("Sidebar bio").type("Symbol").required(false);
 
   // JSON shape: Array<{ label: string; items: string[] }>
-  siteSettings
-    .createField("skills")
-    .name("Skills")
-    .type("Object")
-    .required(false);
+  siteSettings.createField("skills").name("Skills").type("Object").required(false);
 
   // JSON shape: string[]
-  siteSettings
-    .createField("attributes")
-    .name("Attributes")
-    .type("Object")
-    .required(false);
+  siteSettings.createField("attributes").name("Attributes").type("Object").required(false);
 };

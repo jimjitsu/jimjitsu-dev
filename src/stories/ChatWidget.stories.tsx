@@ -105,7 +105,8 @@ export const ErrorState: Story = {
         http.post("/api/chat", () =>
           HttpResponse.json(
             {
-              error: "Look, something went wrong. Life does not stop and start at your convenience — just try again, man.",
+              error:
+                "Look, something went wrong. Life does not stop and start at your convenience — just try again, man.",
               code: "llm_error",
             },
             { status: 500 },

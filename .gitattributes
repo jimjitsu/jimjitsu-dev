@@ -1,0 +1,17 @@
+# Normalize line endings to LF for all text files on every platform.
+# This ends the CRLF/LF churn on Windows checkouts and keeps `prettier`
+# (endOfLine: lf, via .editorconfig) consistent between local and CI.
+* text=auto eol=lf
+
+# Binary files — never normalize or diff as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

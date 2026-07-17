@@ -10,10 +10,8 @@ test.describe("Projects", () => {
     await page.goto("/projects");
 
     const projectLink = page.locator('a[href^="/projects/"]').first();
-    if ((await projectLink.count()) === 0) {
-      // No projects in Contentful yet — nothing to follow.
-      return;
-    }
+    // Surface an empty CMS as a visible skip instead of a silent green pass.
+    test.skip((await projectLink.count()) === 0, "No projects in Contentful — nothing to follow");
 
     const href = await projectLink.getAttribute("href");
     if (!href) return;

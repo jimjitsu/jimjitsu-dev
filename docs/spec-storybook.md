@@ -57,14 +57,14 @@ pnpm add -D \
   msw-storybook-addon@^2
 ```
 
-| Package | Role |
-|---|---|
-| `storybook` | CLI (`storybook dev`, `storybook build`) |
-| `@storybook/nextjs` | Framework adapter — handles `next/image`, `next/link`, `next/navigation`, and `next/font` automatically |
-| `@storybook/addon-docs` | Docs page and MDX support; the only essential sub-addon that ships separately at v10 |
+| Package                   | Role                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `storybook`               | CLI (`storybook dev`, `storybook build`)                                                                      |
+| `@storybook/nextjs`       | Framework adapter — handles `next/image`, `next/link`, `next/navigation`, and `next/font` automatically       |
+| `@storybook/addon-docs`   | Docs page and MDX support; the only essential sub-addon that ships separately at v10                          |
 | `@storybook/addon-themes` | Theme toolbar; use `withThemeByDataAttribute` or `withThemeByClassName` (v10 removed `withThemeByMediaQuery`) |
-| `msw` | Mock Service Worker — intercepts `fetch` in the browser for `ChatWidget` stories |
-| `msw-storybook-addon` | Wires MSW into Storybook's preview lifecycle |
+| `msw`                     | Mock Service Worker — intercepts `fetch` in the browser for `ChatWidget` stories                              |
+| `msw-storybook-addon`     | Wires MSW into Storybook's preview lifecycle                                                                  |
 
 **Storybook v10 bundled features** — interactions (`play` functions), controls, actions, viewport, and backgrounds are built into `storybook@10` core and do **not** require separate addon packages. `@storybook/test` exports (`userEvent`, `expect`) are imported from `"storybook/test"` (no separate package).
 
@@ -93,11 +93,7 @@ import type { StorybookConfig } from "@storybook/nextjs";
 
 const config: StorybookConfig = {
   stories: ["../src/stories/**/*.stories.@(ts|tsx)"],
-  addons: [
-    "@storybook/addon-docs",
-    "@storybook/addon-themes",
-    "msw-storybook-addon",
-  ],
+  addons: ["@storybook/addon-docs", "@storybook/addon-themes", "msw-storybook-addon"],
   framework: {
     name: "@storybook/nextjs",
     options: {},
@@ -109,6 +105,7 @@ export default config;
 ```
 
 Key points:
+
 - `stories` glob covers `src/stories/` only — no accidental story pickup from `src/components/` or test files.
 - `staticDirs: ["../public"]` serves `public/mockServiceWorker.js` so MSW can register its service worker.
 - `@storybook/nextjs` requires no `webpackFinal` or Babel config — it handles Next.js internals automatically.
@@ -213,20 +210,20 @@ src/stories/
 
 Components marked **\*** must be extracted from page files into `src/components/` before stories can be written. See §12 for the extraction plan and recommended APIs.
 
-| Component | Story file | Variants | Needs mock |
-|---|---|---|---|
-| Icons | `Icons.stories.tsx` | One story per icon (6 total); Controls for `size`, `className` | None |
-| BlogPostCard | `BlogPostCard.stories.tsx` | Default, no-tags, no-excerpt, long-title | `Entry<BlogPostSkeleton>` |
-| ProjectCard | `ProjectCard.stories.tsx` | accent=red/teal/amber, no-image, no-technologies | `Entry<ProjectSkeleton>` |
-| ContentfulImage | `ContentfulImage.stories.tsx` | Standard, fill mode, missing asset (renders null) | `Asset` |
-| SidebarShell | `SidebarShell.stories.tsx` | Closed, open, play function for Escape-to-close | None |
-| ChatWidget | `ChatWidget.stories.tsx` | Collapsed, expanded-no-history, loading, stranger-response | MSW handler for `POST /api/chat` |
-| PageHeader **\*** | `PageHeader.stories.tsx` | Default, no-description, no-icon, long-title, h2 variant | None |
-| BackLink **\*** | `BackLink.stories.tsx` | Blog back, Projects back | None |
-| SectionHeader **\*** | `SectionHeader.stories.tsx` | With see-all link, without | None |
-| SkillGroup **\*** | `SkillGroup.stories.tsx` | Default, many-items, single-item | None |
-| ProjectMetaBar **\*** | `ProjectMetaBar.stories.tsx` | All fields, role+tech only, links only, no links | None |
-| ArticleMetaLine **\*** | `ArticleMetaLine.stories.tsx` | All fields, date only, with author, with tags | None |
+| Component              | Story file                    | Variants                                                       | Needs mock                       |
+| ---------------------- | ----------------------------- | -------------------------------------------------------------- | -------------------------------- |
+| Icons                  | `Icons.stories.tsx`           | One story per icon (6 total); Controls for `size`, `className` | None                             |
+| BlogPostCard           | `BlogPostCard.stories.tsx`    | Default, no-tags, no-excerpt, long-title                       | `Entry<BlogPostSkeleton>`        |
+| ProjectCard            | `ProjectCard.stories.tsx`     | accent=red/teal/amber, no-image, no-technologies               | `Entry<ProjectSkeleton>`         |
+| ContentfulImage        | `ContentfulImage.stories.tsx` | Standard, fill mode, missing asset (renders null)              | `Asset`                          |
+| SidebarShell           | `SidebarShell.stories.tsx`    | Closed, open, play function for Escape-to-close                | None                             |
+| ChatWidget             | `ChatWidget.stories.tsx`      | Collapsed, expanded-no-history, loading, stranger-response     | MSW handler for `POST /api/chat` |
+| PageHeader **\***      | `PageHeader.stories.tsx`      | Default, no-description, no-icon, long-title, h2 variant       | None                             |
+| BackLink **\***        | `BackLink.stories.tsx`        | Blog back, Projects back                                       | None                             |
+| SectionHeader **\***   | `SectionHeader.stories.tsx`   | With see-all link, without                                     | None                             |
+| SkillGroup **\***      | `SkillGroup.stories.tsx`      | Default, many-items, single-item                               | None                             |
+| ProjectMetaBar **\***  | `ProjectMetaBar.stories.tsx`  | All fields, role+tech only, links only, no links               | None                             |
+| ArticleMetaLine **\*** | `ArticleMetaLine.stories.tsx` | All fields, date only, with author, with tags                  | None                             |
 
 ---
 
@@ -244,7 +241,16 @@ import type { BlogPostSkeleton, ProjectSkeleton } from "@/lib/contentful";
 
 export function mockAsset(overrides?: Partial<Asset["fields"]>): Asset<undefined> {
   return {
-    sys: { id: "mock-asset", type: "Asset", createdAt: "", updatedAt: "", locale: "en-US", space: { sys: { type: "Link", linkType: "Space", id: "mock-space" } }, environment: { sys: { type: "Link", linkType: "Environment", id: "master" } }, revision: 1 },
+    sys: {
+      id: "mock-asset",
+      type: "Asset",
+      createdAt: "",
+      updatedAt: "",
+      locale: "en-US",
+      space: { sys: { type: "Link", linkType: "Space", id: "mock-space" } },
+      environment: { sys: { type: "Link", linkType: "Environment", id: "master" } },
+      revision: 1,
+    },
     metadata: { tags: [], concepts: [] },
     fields: {
       title: "Mock image",
@@ -257,7 +263,7 @@ export function mockAsset(overrides?: Partial<Asset["fields"]>): Asset<undefined
       },
       ...overrides,
     },
-    toPlainObject: () => ({} as ReturnType<Asset["toPlainObject"]>),
+    toPlainObject: () => ({}) as ReturnType<Asset["toPlainObject"]>,
     update: () => Promise.resolve({} as Asset),
   } as unknown as Asset<undefined>;
 }
@@ -268,18 +274,29 @@ export function mockBlogPost(
   overrides?: Partial<Entry<BlogPostSkeleton, undefined, string>["fields"]>,
 ): Entry<BlogPostSkeleton, undefined, string> {
   return {
-    sys: { id: "mock-post", type: "Entry", createdAt: "2025-01-15T00:00:00Z", updatedAt: "2025-01-15T00:00:00Z", locale: "en-US", contentType: { sys: { type: "Link", linkType: "ContentType", id: "blogPost" } }, space: { sys: { type: "Link", linkType: "Space", id: "mock-space" } }, environment: { sys: { type: "Link", linkType: "Environment", id: "master" } }, revision: 1 },
+    sys: {
+      id: "mock-post",
+      type: "Entry",
+      createdAt: "2025-01-15T00:00:00Z",
+      updatedAt: "2025-01-15T00:00:00Z",
+      locale: "en-US",
+      contentType: { sys: { type: "Link", linkType: "ContentType", id: "blogPost" } },
+      space: { sys: { type: "Link", linkType: "Space", id: "mock-space" } },
+      environment: { sys: { type: "Link", linkType: "Environment", id: "master" } },
+      revision: 1,
+    },
     metadata: { tags: [], concepts: [] },
     fields: {
       title: "Building a Design System from Scratch",
       slug: "building-design-system",
-      excerpt: "How I built the Strike Lane design system using Tailwind CSS custom properties and brutalist aesthetics.",
+      excerpt:
+        "How I built the Strike Lane design system using Tailwind CSS custom properties and brutalist aesthetics.",
       body: "# Full post body here\n\nLorem ipsum...",
       publishDate: "2025-01-15",
       tags: ["design-systems", "tailwind", "css"],
       ...overrides,
     },
-    toPlainObject: () => ({} as ReturnType<Entry["toPlainObject"]>),
+    toPlainObject: () => ({}) as ReturnType<Entry["toPlainObject"]>,
     update: () => Promise.resolve({} as Entry<BlogPostSkeleton, undefined, string>),
   } as unknown as Entry<BlogPostSkeleton, undefined, string>;
 }
@@ -290,13 +307,27 @@ export function mockProject(
   overrides?: Partial<Entry<ProjectSkeleton, undefined, string>["fields"]>,
 ): Entry<ProjectSkeleton, undefined, string> {
   return {
-    sys: { id: "mock-project", type: "Entry", createdAt: "2025-01-10T00:00:00Z", updatedAt: "2025-01-10T00:00:00Z", locale: "en-US", contentType: { sys: { type: "Link", linkType: "ContentType", id: "project" } }, space: { sys: { type: "Link", linkType: "Space", id: "mock-space" } }, environment: { sys: { type: "Link", linkType: "Environment", id: "master" } }, revision: 1 },
+    sys: {
+      id: "mock-project",
+      type: "Entry",
+      createdAt: "2025-01-10T00:00:00Z",
+      updatedAt: "2025-01-10T00:00:00Z",
+      locale: "en-US",
+      contentType: { sys: { type: "Link", linkType: "ContentType", id: "project" } },
+      space: { sys: { type: "Link", linkType: "Space", id: "mock-space" } },
+      environment: { sys: { type: "Link", linkType: "Environment", id: "master" } },
+      revision: 1,
+    },
     metadata: { tags: [], concepts: [] },
     fields: {
       title: "jimjitsu.dev — Portfolio Site",
       slug: "jimjitsu-dev",
       summary: "Personal portfolio and blog built with Next.js, Tailwind CSS, and Contentful.",
-      coverImage: mockAsset() as unknown as Entry<ProjectSkeleton, undefined, string>["fields"]["coverImage"],
+      coverImage: mockAsset() as unknown as Entry<
+        ProjectSkeleton,
+        undefined,
+        string
+      >["fields"]["coverImage"],
       technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Contentful"],
       role: "Design + Engineering",
       liveUrl: "https://jimjitsu.dev",
@@ -306,7 +337,7 @@ export function mockProject(
       order: 1,
       ...overrides,
     },
-    toPlainObject: () => ({} as ReturnType<Entry["toPlainObject"]>),
+    toPlainObject: () => ({}) as ReturnType<Entry["toPlainObject"]>,
     update: () => Promise.resolve({} as Entry<ProjectSkeleton, undefined, string>),
   } as unknown as Entry<ProjectSkeleton, undefined, string>;
 }
@@ -358,9 +389,7 @@ To keep the chat in a loading state (for visual inspection of the loading bubble
 export const Loading: Story = {
   parameters: {
     msw: {
-      handlers: [
-        http.post("/api/chat", () => new Promise(() => {})),
-      ],
+      handlers: [http.post("/api/chat", () => new Promise(() => {}))],
     },
   },
   play: async ({ canvasElement }) => {
@@ -384,7 +413,14 @@ export const Loading: Story = {
 ```typescript
 // src/stories/Icons.stories.tsx
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { BowlingPinIcon, BowlingBallIcon, LaneArrowIcon, StrikeIcon, ChatBubbleIcon, StarburstIcon } from "@/components/icons";
+import {
+  BowlingPinIcon,
+  BowlingBallIcon,
+  LaneArrowIcon,
+  StrikeIcon,
+  ChatBubbleIcon,
+  StarburstIcon,
+} from "@/components/icons";
 
 const meta = {
   title: "Design System/Icons",
@@ -403,12 +439,12 @@ One named export per icon (`BowlingPinIcon`, `BowlingBallIcon`, `LaneArrowIcon`,
 
 Four variants:
 
-| Story | Key field changes |
-|---|---|
-| `Default` | All fields populated |
-| `NoTags` | `tags: []` |
+| Story       | Key field changes                               |
+| ----------- | ----------------------------------------------- |
+| `Default`   | All fields populated                            |
+| `NoTags`    | `tags: []`                                      |
 | `LongTitle` | Title is 80+ characters to test layout wrapping |
-| `NoExcerpt` | `excerpt: undefined` |
+| `NoExcerpt` | `excerpt: undefined`                            |
 
 `BlogPostCard` wraps its content in a `<Link>` which uses `next/link` — handled automatically by `@storybook/nextjs`. Set a `decorator` that wraps the story in a `max-w-sm` container to simulate card-in-grid context.
 
@@ -416,17 +452,18 @@ Four variants:
 
 Five variants:
 
-| Story | Key changes |
-|---|---|
-| `AccentRed` | `accent="red"` (default) |
-| `AccentTeal` | `accent="teal"` |
-| `AccentAmber` | `accent="amber"` |
-| `NoImage` | `coverImage: undefined` — tests the layout without the 16:10 image block |
-| `NoTechnologies` | `technologies: undefined` |
+| Story            | Key changes                                                              |
+| ---------------- | ------------------------------------------------------------------------ |
+| `AccentRed`      | `accent="red"` (default)                                                 |
+| `AccentTeal`     | `accent="teal"`                                                          |
+| `AccentAmber`    | `accent="amber"`                                                         |
+| `NoImage`        | `coverImage: undefined` — tests the layout without the 16:10 image block |
+| `NoTechnologies` | `technologies: undefined`                                                |
 
 ### 9.4 ContentfulImage
 
 Three variants:
+
 - `Standard`: full `Asset` mock with known dimensions (1200×800). Renders with explicit `width`/`height`.
 - `FillMode`: `fill={true}` — wrap in a `relative h-64 w-full` container to give it dimensions.
 - `MissingAsset`: `asset={undefined}` — verifies the null guard renders nothing.
@@ -435,10 +472,10 @@ Three variants:
 
 `SidebarShell` accepts children (the sidebar nav content) and owns mobile open/close state internally. Stories pass a simple nav placeholder as children.
 
-| Story | State |
-|---|---|
-| `Closed` | Default closed state (desktop) |
-| `Open` | Open state on mobile (set viewport to `375px`) |
+| Story           | State                                                                            |
+| --------------- | -------------------------------------------------------------------------------- |
+| `Closed`        | Default closed state (desktop)                                                   |
+| `Open`          | Open state on mobile (set viewport to `375px`)                                   |
 | `EscapeToClose` | `play` function opens the drawer then fires `Escape` — asserts the drawer closes |
 
 The `play` function for `EscapeToClose`:
@@ -455,18 +492,19 @@ play: async ({ canvasElement }) => {
 
 ### 9.6 ChatWidget
 
-| Story | MSW handler | Initial state |
-|---|---|---|
-| `Collapsed` | None | Widget in collapsed/button state |
-| `Expanded` | None (widget just opened) | Widget open, welcome message visible |
-| `Loading` | Never-resolving promise | Message submitted; loading dots visible |
-| `JimbotResponse` | Returns `triggered_stranger: false` | Full Jimbo-t response bubble |
-| `WithStrangerResponse` | Returns `triggered_stranger: true` | Both bubbles visible (Stranger fades in at 800ms) |
-| `ErrorState` | Returns 500 | Error message bubble in Jimbo-t voice |
+| Story                  | MSW handler                         | Initial state                                     |
+| ---------------------- | ----------------------------------- | ------------------------------------------------- |
+| `Collapsed`            | None                                | Widget in collapsed/button state                  |
+| `Expanded`             | None (widget just opened)           | Widget open, welcome message visible              |
+| `Loading`              | Never-resolving promise             | Message submitted; loading dots visible           |
+| `JimbotResponse`       | Returns `triggered_stranger: false` | Full Jimbo-t response bubble                      |
+| `WithStrangerResponse` | Returns `triggered_stranger: true`  | Both bubbles visible (Stranger fades in at 800ms) |
+| `ErrorState`           | Returns 500                         | Error message bubble in Jimbo-t voice             |
 
 Play functions for the stories that require interaction before settling:
 
 **`Expanded`** — opens the widget only:
+
 ```typescript
 play: async ({ canvasElement }) => {
   const canvas = within(canvasElement);
@@ -476,6 +514,7 @@ play: async ({ canvasElement }) => {
 ```
 
 **`JimbotResponse`** and **`WithStrangerResponse`** — opens the widget, submits a message, and waits for the MSW handler to resolve:
+
 ```typescript
 play: async ({ canvasElement }) => {
   const canvas = within(canvasElement);
@@ -546,23 +585,23 @@ The extractions are sorted from highest to lowest impact (reuse × visual comple
 ```typescript
 // src/components/page-header.tsx
 interface PageHeaderProps {
-  eyebrow: string;                    // e.g. "From the blog"
-  icon?: React.ReactNode;             // e.g. <BowlingPinIcon size={16} className="text-amber" />
-  title: string;                      // h1/h2 text
-  description?: string;               // optional lead paragraph
-  headingLevel?: "h1" | "h2";        // defaults to "h1"
+  eyebrow: string; // e.g. "From the blog"
+  icon?: React.ReactNode; // e.g. <BowlingPinIcon size={16} className="text-amber" />
+  title: string; // h1/h2 text
+  description?: string; // optional lead paragraph
+  headingLevel?: "h1" | "h2"; // defaults to "h1"
 }
 ```
 
 **Stories:**
 
-| Story | Key variations |
-|---|---|
-| `Default` | eyebrow + icon + title + description |
-| `NoDescription` | title only; no description paragraph |
-| `NoIcon` | eyebrow label with no icon |
-| `LongTitle` | 60+ char title to test `display-heading` wrapping |
-| `HeadingLevelH2` | `headingLevel="h2"` — for home page section use |
+| Story            | Key variations                                    |
+| ---------------- | ------------------------------------------------- |
+| `Default`        | eyebrow + icon + title + description              |
+| `NoDescription`  | title only; no description paragraph              |
+| `NoIcon`         | eyebrow label with no icon                        |
+| `LongTitle`      | 60+ char title to test `display-heading` wrapping |
+| `HeadingLevelH2` | `headingLevel="h2"` — for home page section use   |
 
 **Story file:** `src/stories/PageHeader.stories.tsx`
 
@@ -579,16 +618,16 @@ interface PageHeaderProps {
 ```typescript
 // src/components/back-link.tsx
 interface BackLinkProps {
-  href: string;    // e.g. "/blog"
-  label: string;   // e.g. "All posts"
+  href: string; // e.g. "/blog"
+  label: string; // e.g. "All posts"
 }
 ```
 
 **Stories:**
 
-| Story | Key variations |
-|---|---|
-| `Default` | `href="/blog" label="All posts"` |
+| Story      | Key variations                          |
+| ---------- | --------------------------------------- |
+| `Default`  | `href="/blog" label="All posts"`        |
 | `Projects` | `href="/projects" label="All projects"` |
 
 **Story file:** `src/stories/BackLink.stories.tsx`
@@ -612,16 +651,16 @@ interface SectionHeaderProps {
   icon?: React.ReactNode;
   title: string;
   seeAllHref?: string;
-  seeAllLabel?: string;   // e.g. "All projects"
+  seeAllLabel?: string; // e.g. "All projects"
 }
 ```
 
 **Stories:**
 
-| Story | Key variations |
-|---|---|
-| `WithSeeAll` | All props including `seeAllHref` and `seeAllLabel` |
-| `NoSeeAll` | No see-all link — simple centered eyebrow + heading |
+| Story        | Key variations                                      |
+| ------------ | --------------------------------------------------- |
+| `WithSeeAll` | All props including `seeAllHref` and `seeAllLabel`  |
+| `NoSeeAll`   | No see-all link — simple centered eyebrow + heading |
 
 **Story file:** `src/stories/SectionHeader.stories.tsx`
 
@@ -638,7 +677,7 @@ interface SectionHeaderProps {
 ```typescript
 // src/components/skill-group.tsx
 interface SkillGroupProps {
-  label: string;        // "Languages", "Frameworks", etc.
+  label: string; // "Languages", "Frameworks", etc.
   items: readonly string[];
 }
 ```
@@ -647,10 +686,10 @@ interface SkillGroupProps {
 
 **Stories:**
 
-| Story | Key variations |
-|---|---|
-| `Default` | 4 items (normal count) |
-| `ManyItems` | 8+ items to verify wrap behavior |
+| Story        | Key variations                    |
+| ------------ | --------------------------------- |
+| `Default`    | 4 items (normal count)            |
+| `ManyItems`  | 8+ items to verify wrap behavior  |
 | `SingleItem` | Edge case: a single-item category |
 
 **Story file:** `src/stories/SkillGroup.stories.tsx`
@@ -677,12 +716,12 @@ interface ProjectMetaBarProps {
 
 **Stories:**
 
-| Story | Key variations |
-|---|---|
-| `AllFields` | All four props populated |
-| `RoleAndTechOnly` | No URLs |
-| `LinksOnly` | No role or tech |
-| `NoLinks` | Role and tech, `liveUrl` and `repoUrl` both absent |
+| Story             | Key variations                                     |
+| ----------------- | -------------------------------------------------- |
+| `AllFields`       | All four props populated                           |
+| `RoleAndTechOnly` | No URLs                                            |
+| `LinksOnly`       | No role or tech                                    |
+| `NoLinks`         | Role and tech, `liveUrl` and `repoUrl` both absent |
 
 **Story file:** `src/stories/ProjectMetaBar.stories.tsx`
 
@@ -699,7 +738,7 @@ interface ProjectMetaBarProps {
 ```typescript
 // src/components/article-meta-line.tsx
 interface ArticleMetaLineProps {
-  publishDate: string;   // ISO date string
+  publishDate: string; // ISO date string
   author?: string;
   tags?: string[];
 }
@@ -707,12 +746,12 @@ interface ArticleMetaLineProps {
 
 **Stories:**
 
-| Story | Key variations |
-|---|---|
-| `AllFields` | Date + author + tags |
-| `DateOnly` | No author, no tags |
+| Story        | Key variations         |
+| ------------ | ---------------------- |
+| `AllFields`  | Date + author + tags   |
+| `DateOnly`   | No author, no tags     |
 | `WithAuthor` | Date + author, no tags |
-| `WithTags` | Date + tags, no author |
+| `WithTags`   | Date + tags, no author |
 
 **Story file:** `src/stories/ArticleMetaLine.stories.tsx`
 
@@ -852,16 +891,16 @@ CLAUDE.md                            Document Storybook scripts and stories loca
 
 ## 15. Design Decisions Summary
 
-| Decision | Choice | Reason |
-|---|---|---|
-| Storybook version | 8.x (`storybook@latest`) | React 19 support; CSF3 native |
-| Framework adapter | `@storybook/nextjs` | Handles `next/image`, `next/link`, `next/navigation`, `next/font` — no manual mocking |
-| Dark mode mechanism | No decorator; OS preference | `withThemeByMediaQuery` removed in v10; no replacement works without changing `globals.css` |
-| Backgrounds addon | Disabled | CSS custom properties define background — the addon would conflict |
-| Stories location | `src/stories/` (not co-located) | Keeps `src/components/` free of non-production files; easier to audit |
-| Contentful mocking | Plain TypeScript factories | No addon needed; fully typed; simple to extend |
-| API mocking | MSW via `msw-storybook-addon` | Industry standard; intercepts at the network layer — no component code changes required |
-| Async server components | Out of scope (v1) | Cannot run in browser; document the limitation and migration path |
-| Stories format | CSF3 TypeScript (`satisfies Meta`) | Consistent with project's strict TypeScript setup; better inference than `Meta<typeof Component>` |
-| Font handling | Automatic via `@storybook/nextjs` | No manual CSS variable injection; `next/font` runs normally |
-| `public/mockServiceWorker.js` | Committed to repo | MSW requires the file to be served at the root; it's a generated but stable file |
+| Decision                      | Choice                             | Reason                                                                                            |
+| ----------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Storybook version             | 8.x (`storybook@latest`)           | React 19 support; CSF3 native                                                                     |
+| Framework adapter             | `@storybook/nextjs`                | Handles `next/image`, `next/link`, `next/navigation`, `next/font` — no manual mocking             |
+| Dark mode mechanism           | No decorator; OS preference        | `withThemeByMediaQuery` removed in v10; no replacement works without changing `globals.css`       |
+| Backgrounds addon             | Disabled                           | CSS custom properties define background — the addon would conflict                                |
+| Stories location              | `src/stories/` (not co-located)    | Keeps `src/components/` free of non-production files; easier to audit                             |
+| Contentful mocking            | Plain TypeScript factories         | No addon needed; fully typed; simple to extend                                                    |
+| API mocking                   | MSW via `msw-storybook-addon`      | Industry standard; intercepts at the network layer — no component code changes required           |
+| Async server components       | Out of scope (v1)                  | Cannot run in browser; document the limitation and migration path                                 |
+| Stories format                | CSF3 TypeScript (`satisfies Meta`) | Consistent with project's strict TypeScript setup; better inference than `Meta<typeof Component>` |
+| Font handling                 | Automatic via `@storybook/nextjs`  | No manual CSS variable injection; `next/font` runs normally                                       |
+| `public/mockServiceWorker.js` | Committed to repo                  | MSW requires the file to be served at the root; it's a generated but stable file                  |

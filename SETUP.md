@@ -107,12 +107,12 @@ CONTENTFUL_PREVIEW_ACCESS_TOKEN=<Preview API token>
 
 ## Common commands
 
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Start the dev server at <http://localhost:3000>. |
-| `pnpm build` | Production build. |
-| `pnpm start` | Run the production build locally. |
-| `pnpm lint` | ESLint. |
-| `pnpm typecheck` | Strict TypeScript check (no emit). |
-| `pnpm format` | Prettier write. |
-| `pnpm format:check` | Prettier check (CI-friendly). |
+| Command             | What it does                                     |
+| ------------------- | ------------------------------------------------ |
+| `pnpm dev`          | Start the dev server at <http://localhost:3000>. |
+| `pnpm build`        | Production build.                                |
+| `pnpm start`        | Run the production build locally.                |
+| `pnpm lint`         | ESLint.                                          |
+| `pnpm typecheck`    | Strict TypeScript check (no emit).               |
+| `pnpm format`       | Prettier write.                                  |
+| `pnpm format:check` | Prettier check (CI-friendly).                    |

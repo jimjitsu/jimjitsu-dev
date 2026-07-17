@@ -18,7 +18,7 @@ The chatbot is a career-information tool wearing a personality costume. It must 
 
 ### 2.1 Jimbo-t (Primary Voice)
 
-**Identity:** Jim Tierney's **digital twin and self-appointed hype-man** — a separate character, *not* Jim himself, filtered through a mash-up of The Dude's studied indifference and Walter Sobchak's unsolicited conviction. He knows Jim's career inside-out and talks the man up. The handle "Jimbo-t" echoes the site brand (jimjitsu.dev) and digital-twin naming conventions.
+**Identity:** Jim Tierney's **digital twin and self-appointed hype-man** — a separate character, _not_ Jim himself, filtered through a mash-up of The Dude's studied indifference and Walter Sobchak's unsolicited conviction. He knows Jim's career inside-out and talks the man up. The handle "Jimbo-t" echoes the site brand (jimjitsu.dev) and digital-twin naming conventions.
 
 **Personality traits:**
 
@@ -61,10 +61,10 @@ The chatbot is a career-information tool wearing a personality costume. It must 
 
 The Stranger responds **every single time** one of these conditions is met:
 
-| Trigger | Condition |
-|---|---|
-| `profanity` | Jimbo-t's response contains any of: `fuck`, `shit`, `ass`, `damn`, `bastard`, `piss`, `crap` (case-insensitive, word-boundary match) |
-| `stranger_echo` | Jimbo-t's response substantially echoes or quotes one of The Stranger's four canonical lines (determined by the LLM) |
+| Trigger         | Condition                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `profanity`     | Jimbo-t's response contains any of: `fuck`, `shit`, `ass`, `damn`, `bastard`, `piss`, `crap` (case-insensitive, word-boundary match) |
+| `stranger_echo` | Jimbo-t's response substantially echoes or quotes one of The Stranger's four canonical lines (determined by the LLM)                 |
 
 ---
 
@@ -72,13 +72,13 @@ The Stranger responds **every single time** one of these conditions is met:
 
 **Recommended: `google/gemini-2.5-flash` via OpenRouter**
 
-| Criterion | Gemini 2.5 Flash | Claude 3.5 Haiku | Llama 3.3 70B |
-|---|---|---|---|
-| Character adherence | Excellent | Very good | Good, can drift |
-| Structured JSON output | Native, reliable | Native, excellent | Available, less reliable |
-| Context window | **1M tokens** | 200K | 128K |
-| Cost (input) | ~$0.075/1M tokens | ~$0.80/1M tokens | ~$0.12/1M tokens |
-| Speed | Fast (Flash tier) | Fast | Variable |
+| Criterion              | Gemini 2.5 Flash  | Claude 3.5 Haiku  | Llama 3.3 70B            |
+| ---------------------- | ----------------- | ----------------- | ------------------------ |
+| Character adherence    | Excellent         | Very good         | Good, can drift          |
+| Structured JSON output | Native, reliable  | Native, excellent | Available, less reliable |
+| Context window         | **1M tokens**     | 200K              | 128K                     |
+| Cost (input)           | ~$0.075/1M tokens | ~$0.80/1M tokens  | ~$0.12/1M tokens         |
+| Speed                  | Fast (Flash tier) | Fast              | Variable                 |
 
 **The decisive factor is the 1M context window.** The full career context (all projects, blog excerpts, bio), the entire quotes library, and conversation history all fit comfortably in a single Gemini 2.5 Flash context. This eliminates any need for RAG, chunking, or retrieval complexity — the entire prompt is assembled at request time as a single string.
 
@@ -101,8 +101,8 @@ No API routes currently exist in the project — this is the first.
 ```typescript
 // POST /api/chat
 interface ChatRequest {
-  message: string;       // User's plaintext message, max 500 chars
-  history?: ChatTurn[];  // Prior turns for multi-turn context, max 10
+  message: string; // User's plaintext message, max 500 chars
+  history?: ChatTurn[]; // Prior turns for multi-turn context, max 10
 }
 
 interface ChatTurn {
@@ -112,6 +112,7 @@ interface ChatTurn {
 ```
 
 **Validation:**
+
 - `message` exceeding 500 chars → `400 Bad Request`
 - `history` beyond 10 turns → silently truncate (drop oldest)
 - Missing `message` → `400 Bad Request`
@@ -125,15 +126,18 @@ The route handler posts to OpenRouter's OpenAI-compatible endpoint.
 **Endpoint:** `POST https://openrouter.ai/api/v1/chat/completions`
 
 **Required headers:**
+
 ```
 Authorization: Bearer ${process.env.OPENROUTER_API_KEY}
 Content-Type: application/json
 HTTP-Referer: https://jimjitsu.dev
 X-Title: jimjitsu-digital-twin
 ```
+
 `HTTP-Referer` and `X-Title` are required by OpenRouter for app identification and rate-limit policy. Missing them can cause throttling.
 
 **Request body:**
+
 ```json
 {
   "model": "google/gemini-2.5-flash",
@@ -157,20 +161,26 @@ X-Title: jimjitsu-digital-twin
 **History serialization for assistant turns:**
 
 When building the `messages` array from `history`, format each prior assistant turn as:
+
 ```
 [Jimbo-t]: {jimbot.text}
 [The Stranger]: {stranger.text}
 ```
+
 (omit the `[The Stranger]` line if `triggered_stranger` was false for that turn). This preserves conversational attribution across turns so the model knows who said what.
 
 **JSON parse resilience:**
 
 Despite the system prompt instruction, Gemini occasionally wraps JSON in markdown code fences. Strip before parsing:
-```typescript
+
+````typescript
 const raw = completion.choices[0].message.content ?? "";
-const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+const cleaned = raw
+  .replace(/^```(?:json)?\s*/i, "")
+  .replace(/\s*```$/i, "")
+  .trim();
 const parsed = JSON.parse(cleaned) as ChatResponse;
-```
+````
 
 ### 4.4 Response Schema
 
@@ -194,6 +204,7 @@ interface StrangerResponse {
 ```
 
 **Example — no trigger:**
+
 ```json
 {
   "jimbot": {
@@ -205,6 +216,7 @@ interface StrangerResponse {
 ```
 
 **Example — profanity trigger:**
+
 ```json
 {
   "jimbot": {
@@ -219,14 +231,16 @@ interface StrangerResponse {
 ```
 
 **Error response:**
+
 ```typescript
 interface ChatError {
-  error: string;           // Human-readable message, Lebowski-flavored
+  error: string; // Human-readable message, Lebowski-flavored
   code: "validation_error" | "llm_error" | "rate_limited";
 }
 ```
 
 Error message example (LLM failure):
+
 > "Look, something went wrong. Life does not stop and start at your convenience — just try again, man."
 
 ---
@@ -238,6 +252,7 @@ Error message example (LLM failure):
 **Why not streaming:**
 
 The conditional two-character structure is the key driver. Streaming Jimbo-t's response first and then conditionally firing a second request for The Stranger requires:
+
 - Two round-trips (double API calls, double cost)
 - Client-side trigger detection on a partial stream (fragile — profanity word split across chunks)
 - Complex client state to manage two concurrent streams
@@ -321,7 +336,7 @@ Use this section to answer questions about Jim's career accurately.
 
 ### Section 4 — Big Lebowski Quotes Library
 
-The quote section is built data-driven from `src/data/big_lebowski_quotes.json` by `formatQuoteSection()` over three groups: **voice characters** (The Dude + Walter — Jimbo-t's core voice), a **supporting cast** subsection (Donny, Jesus, Maude, the Big Lebowski, Brandt, Nihilists, Treehorn, Da Fino — *occasional* riffs only, never an identity Jimbo-t adopts), and **The Stranger** (trigger detection only). Supporting-cast lines are curated for a career site: `Bunny Lebowski` is omitted entirely and a few overtly sexual lines are dropped via an `EXCLUDED_QUOTES` denylist in `chat-prompts.ts`.
+The quote section is built data-driven from `src/data/big_lebowski_quotes.json` by `formatQuoteSection()` over three groups: **voice characters** (The Dude + Walter — Jimbo-t's core voice), a **supporting cast** subsection (Donny, Jesus, Maude, the Big Lebowski, Brandt, Nihilists, Treehorn, Da Fino — _occasional_ riffs only, never an identity Jimbo-t adopts), and **The Stranger** (trigger detection only). Supporting-cast lines are curated for a career site: `Bunny Lebowski` is omitted entirely and a few overtly sexual lines are dropped via an `EXCLUDED_QUOTES` denylist in `chat-prompts.ts`.
 
 ```
 ## Big Lebowski Quotes
@@ -442,13 +457,14 @@ export const getCareerContext = unstable_cache(
     // format and return markdown string
   },
   ["chat-career-context"],
-  { revalidate: 60 }
+  { revalidate: 60 },
 );
 ```
 
 ### Reuse These Existing Helpers
 
 All from `src/lib/contentful.ts`:
+
 - `getAllProjects()` — returns all projects sorted by order/date
 - `getAllBlogPosts()` — returns all posts reverse-chronological
 - `getClient()` — delivery client (no preview mode needed for the chatbot)
@@ -519,6 +535,7 @@ Label:     "Ask Jimbo-t" in .eyebrow-sm, appears to the left of the button on ho
 ### 8.3 Expanded State (Chat Panel)
 
 **Panel container:**
+
 ```
 Position:  fixed bottom-24 right-6 z-40 (desktop)
 Size:      w-[380px] max-w-[calc(100vw-2rem)] max-h-[520px]
@@ -529,6 +546,7 @@ Top bar:   h-2 bg-amber (amber accent — visually distinct from red CTAs and te
 ```
 
 **Header:**
+
 ```
 Layout:    flex justify-between items-center px-4 py-3 border-b-2 border-ink
 Left:      [teal BowlingPinIcon] + "Jimbo-t" in font-display (Sancreek)
@@ -537,6 +555,7 @@ Below:     .eyebrow-sm text-ink-muted — "Ask about Jim's career"
 ```
 
 **Conversation area:**
+
 ```
 overflow-y-auto, flex-1, px-4 py-3, space-y-4
 aria-live="polite"
@@ -545,15 +564,16 @@ Auto-scroll to bottom on new message (useRef + scrollIntoView)
 
 **Message bubbles:**
 
-| Role | Alignment | Style |
-|---|---|---|
-| User | Right | `bg-surface border border-ink rounded-none font-mono text-sm` |
-| Jimbo-t | Left | `bg-base border-2 border-ink border-l-4 border-l-amber font-mono text-sm` |
-| The Stranger | Left | `bg-surface border-2 border-ink border-dashed border-l-4 border-l-teal font-mono text-sm` |
+| Role         | Alignment | Style                                                                                     |
+| ------------ | --------- | ----------------------------------------------------------------------------------------- |
+| User         | Right     | `bg-surface border border-ink rounded-none font-mono text-sm`                             |
+| Jimbo-t      | Left      | `bg-base border-2 border-ink border-l-4 border-l-amber font-mono text-sm`                 |
+| The Stranger | Left      | `bg-surface border-2 border-ink border-dashed border-l-4 border-l-teal font-mono text-sm` |
 
 Above each assistant turn: `.eyebrow-sm` character name label (`text-ink-muted` for Jimbo-t, `text-teal` for The Stranger).
 
 **Sequential reveal for two-character turns:**
+
 1. Jimbo-t's bubble appears immediately on response receipt
 2. After 800ms, The Stranger's bubble fades in (`transition-opacity duration-500`)
 3. This preserves the dramatic beat of The Stranger "reacting" despite the single-request architecture
@@ -562,6 +582,7 @@ Above each assistant turn: `.eyebrow-sm` character name label (`text-ink-muted` 
 Three animated dots inside a Jimbo-t-style bubble: `animate-pulse` with staggered delays.
 
 **Input area:**
+
 ```
 Layout:    border-t-2 border-ink flex items-end gap-2 p-3
 Textarea:  font-mono text-sm bg-base, no border/ring/outline, resize-none
@@ -635,6 +656,7 @@ docs/spec-digital-twin-chatbot.md This document
 ```
 
 **Modified files:**
+
 ```
 src/app/layout.tsx                Add <ChatWidget /> import and render
 src/components/icons/index.tsx    Add ChatBubbleIcon SVG
@@ -713,19 +735,19 @@ OPENROUTER_MODEL=google/gemini-2.5-flash   # optional override; defaults to this
 
 ## 12. Design Decisions Summary
 
-| Decision | Choice | Reason |
-|---|---|---|
-| LLM provider | OpenRouter | Single integration point, easy model switching |
-| Model | `google/gemini-2.5-flash` | 1M context window — entire career data + quotes in one prompt |
-| Response format | Non-streaming JSON | Two-character conditional response is simpler as a single round-trip |
-| Stranger frequency | Always (100%) | Predictable, reinforces the bit every time |
-| Quote injection | Full Dude + Walter + curated supporting cast + Stranger | Prevents hallucinated quotes; negligible prompt cost |
-| Career context | Contentful at request time + `unstable_cache` 60s | Always current, no redeploy needed to update |
-| RAG | No | One person's career fits comfortably in a single prompt |
-| UI placement | Floating widget, all pages | Ambient discoverability without consuming page layout |
-| Stranger trigger detection | Server-side (LLM evaluates and sets `triggered_stranger`) | More reliable than client-side string parsing |
-| Chat history | Session only (React state) | Simpler; no privacy/storage concerns |
-| Skills data | Hardcoded in `chat-context.ts` | No dedicated Contentful field; project `technologies` are the source of truth |
-| Contentful failure | Fallback to hardcoded bio + skills | Chatbot degrades gracefully rather than returning 500s |
-| LLM temperature | 0.8 | Enough creativity for natural quote riffs; coherent enough to stay on topic |
-| Opening experience | Static welcome message + 3 suggestion chips | Reduces blank-slate friction; no extra API call needed |
+| Decision                   | Choice                                                    | Reason                                                                        |
+| -------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| LLM provider               | OpenRouter                                                | Single integration point, easy model switching                                |
+| Model                      | `google/gemini-2.5-flash`                                 | 1M context window — entire career data + quotes in one prompt                 |
+| Response format            | Non-streaming JSON                                        | Two-character conditional response is simpler as a single round-trip          |
+| Stranger frequency         | Always (100%)                                             | Predictable, reinforces the bit every time                                    |
+| Quote injection            | Full Dude + Walter + curated supporting cast + Stranger   | Prevents hallucinated quotes; negligible prompt cost                          |
+| Career context             | Contentful at request time + `unstable_cache` 60s         | Always current, no redeploy needed to update                                  |
+| RAG                        | No                                                        | One person's career fits comfortably in a single prompt                       |
+| UI placement               | Floating widget, all pages                                | Ambient discoverability without consuming page layout                         |
+| Stranger trigger detection | Server-side (LLM evaluates and sets `triggered_stranger`) | More reliable than client-side string parsing                                 |
+| Chat history               | Session only (React state)                                | Simpler; no privacy/storage concerns                                          |
+| Skills data                | Hardcoded in `chat-context.ts`                            | No dedicated Contentful field; project `technologies` are the source of truth |
+| Contentful failure         | Fallback to hardcoded bio + skills                        | Chatbot degrades gracefully rather than returning 500s                        |
+| LLM temperature            | 0.8                                                       | Enough creativity for natural quote riffs; coherent enough to stay on topic   |
+| Opening experience         | Static welcome message + 3 suggestion chips               | Reduces blank-slate friction; no extra API call needed                        |

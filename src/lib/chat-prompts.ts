@@ -29,9 +29,9 @@ function bullets(name: string): string {
 }
 
 function formatQuoteSection(): string {
-  const supporting = SUPPORTING_CHARACTERS.map(
-    (name) => `#### ${name}\n${bullets(name)}`,
-  ).join("\n\n");
+  const supporting = SUPPORTING_CHARACTERS.map((name) => `#### ${name}\n${bullets(name)}`).join(
+    "\n\n",
+  );
 
   return `## Big Lebowski Quotes
 
