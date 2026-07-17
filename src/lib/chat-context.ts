@@ -1,6 +1,13 @@
 import { unstable_cache } from "next/cache";
-import { getAllProjects, getAllBlogPosts, getPrimaryAuthor } from "./contentful";
+import {
+  getAllProjects,
+  getAllBlogPosts,
+  getPrimaryAuthor,
+  getSiteSettings,
+  type SkillGroup,
+} from "./contentful";
 
+// Fallback skills, used only when the CMS `siteSettings.skills` field is empty.
 const SKILLS = `Languages: HTML, CSS, JavaScript, TypeScript
 Frameworks: React, Next.js, Vue, Svelte, jQuery
 Styling: Tailwind CSS, Bootstrap, Foundation
@@ -8,6 +15,12 @@ Tooling: Webpack, Node.js, npm, Grunt, Gulp, GSAP, Git
 CMS: Contentful, Kentico, Sitecore, WordPress
 AI: Claude Code, Cursor, GitHub Copilot
 Additional: Design systems, web performance, WCAG 2.1 AA accessibility, agile, cross-functional collaboration`.trim();
+
+/** Format the CMS skill groups into the prompt's plain-text shape, or fall back. */
+function formatSkills(groups: SkillGroup[] | undefined): string {
+  if (!groups?.length) return SKILLS;
+  return groups.map((group) => `${group.label}: ${group.items.join(", ")}`).join("\n");
+}
 
 const FALLBACK_CAREER_CONTEXT = `### Bio
 Jim Tierney is a frontend engineer based in Milwaukee, WI. He has over a decade of experience at agencies like Hanson Dodge and Ascedia, where he specialized in building fast, accessible, component-driven UIs and the design systems that power them. He's worked on large-scale Sitecore, Kentico, and WordPress projects, led frontend teams, mentored developers, and collaborated closely with UX and design.
@@ -17,13 +30,15 @@ ${SKILLS}`.trim();
 
 async function fetchCareerContext(): Promise<string> {
   try {
-    const [projectsResult, postsResult, author] = await Promise.all([
+    const [projectsResult, postsResult, author, settings] = await Promise.all([
       getAllProjects(),
       getAllBlogPosts(),
       getPrimaryAuthor(),
+      getSiteSettings(),
     ]);
 
     const bio = author?.fields.bio ?? "Frontend engineer based in Milwaukee, WI.";
+    const skills = formatSkills(settings?.fields.skills);
 
     const projectsText = projectsResult.items
       .map((p) => {
@@ -58,7 +73,7 @@ async function fetchCareerContext(): Promise<string> {
 ${bio}
 
 ### Skills
-${SKILLS}
+${skills}
 
 ### Projects
 ${projectsText || "No projects published yet."}
