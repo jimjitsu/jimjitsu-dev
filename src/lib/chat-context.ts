@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { getAllProjects, getAllBlogPosts, getClient, type AuthorSkeleton } from "./contentful";
+import { getAllProjects, getAllBlogPosts, getPrimaryAuthor } from "./contentful";
 
 const SKILLS = `Languages: HTML, CSS, JavaScript, TypeScript
 Frameworks: React, Next.js, Vue, Svelte, jQuery
@@ -17,13 +17,12 @@ ${SKILLS}`.trim();
 
 async function fetchCareerContext(): Promise<string> {
   try {
-    const [projectsResult, postsResult, authorResult] = await Promise.all([
+    const [projectsResult, postsResult, author] = await Promise.all([
       getAllProjects(),
       getAllBlogPosts(),
-      getClient().getEntries<AuthorSkeleton>({ content_type: "author", limit: 1 }),
+      getPrimaryAuthor(),
     ]);
 
-    const author = authorResult.items[0];
     const bio = author?.fields.bio ?? "Frontend engineer based in Milwaukee, WI.";
 
     const projectsText = projectsResult.items

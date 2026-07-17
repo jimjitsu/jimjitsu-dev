@@ -1,4 +1,9 @@
-import { createClient, type ContentfulClientApi, type EntryFieldTypes } from "contentful";
+import {
+  createClient,
+  type ContentfulClientApi,
+  type Entry,
+  type EntryFieldTypes,
+} from "contentful";
 
 /* -------------------------------------------------------------------------- */
 /* Type definitions — mirror the content types in migrations/0001-...        */
@@ -72,49 +77,47 @@ export type SiteSettingsSkeleton = {
 /* Client                                                                     */
 /* -------------------------------------------------------------------------- */
 
-const space = process.env.CONTENTFUL_SPACE_ID;
-const environment = process.env.CONTENTFUL_ENVIRONMENT ?? "master";
-const deliveryToken = process.env.CONTENTFUL_DELIVERY_TOKEN;
-const previewToken = process.env.CONTENTFUL_PREVIEW_TOKEN;
+// Lazily-created client singletons. Importing this module never throws when
+// Contentful env is absent — so `next build`, the chat route, and CI on
+// Dependabot/fork PRs (which don't receive repo secrets) all still work.
+// getClient() returns null without env, and the fetch helpers below degrade
+// to empty results.
+let deliveryClientSingleton: ContentfulClientApi<undefined> | null = null;
+let previewClientSingleton: ContentfulClientApi<undefined> | null = null;
 
-if (!space || !deliveryToken) {
-  // Throw at module init to fail fast in dev. In a future iteration we may
-  // soften this so non-Contentful pages can still build during scaffold work.
-  throw new Error(
-    "Contentful env vars missing. Copy .env.local.example to .env.local and fill them in.",
-  );
+function getDeliveryClient(): ContentfulClientApi<undefined> | null {
+  const space = process.env.CONTENTFUL_SPACE_ID;
+  const accessToken = process.env.CONTENTFUL_DELIVERY_TOKEN;
+  if (!space || !accessToken) return null;
+  deliveryClientSingleton ??= createClient({
+    space,
+    environment: process.env.CONTENTFUL_ENVIRONMENT ?? "master",
+    accessToken,
+  });
+  return deliveryClientSingleton;
+}
+
+function getPreviewClient(): ContentfulClientApi<undefined> | null {
+  const space = process.env.CONTENTFUL_SPACE_ID;
+  const accessToken = process.env.CONTENTFUL_PREVIEW_TOKEN;
+  if (!space || !accessToken) return null;
+  previewClientSingleton ??= createClient({
+    space,
+    environment: process.env.CONTENTFUL_ENVIRONMENT ?? "master",
+    accessToken,
+    host: "preview.contentful.com",
+  });
+  return previewClientSingleton;
 }
 
 /**
- * The default Contentful Delivery client — published content only.
- * Use this for production reads.
+ * Pick the right client based on whether we're in draft/preview mode. Returns
+ * null when the required env vars are absent — callers must handle that (the
+ * fetch helpers below do). Pages can pass `draft` from `await draftMode()`.
  */
-export const contentful: ContentfulClientApi<undefined> = createClient({
-  space,
-  environment,
-  accessToken: deliveryToken,
-});
-
-/**
- * Preview client — returns draft content. Only initialized if a preview token
- * is configured. Use behind a draft-mode check.
- */
-export const contentfulPreview: ContentfulClientApi<undefined> | null = previewToken
-  ? createClient({
-      space,
-      environment,
-      accessToken: previewToken,
-      host: "preview.contentful.com",
-    })
-  : null;
-
-/**
- * Pick the right client based on whether we're in draft/preview mode.
- * Pages can pass `draft` from `await draftMode()` (Next.js).
- */
-export function getClient(draft = false): ContentfulClientApi<undefined> {
-  if (draft && contentfulPreview) return contentfulPreview;
-  return contentful;
+export function getClient(draft = false): ContentfulClientApi<undefined> | null {
+  if (draft) return getPreviewClient() ?? getDeliveryClient();
+  return getDeliveryClient();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -130,8 +133,11 @@ export function resolveAssetUrl(url: string | undefined | null): string | undefi
   return url.startsWith("//") ? `https:${url}` : url;
 }
 
-export async function getAllProjects(opts: { draft?: boolean } = {}) {
+export async function getAllProjects(
+  opts: { draft?: boolean } = {},
+): Promise<{ items: Entry<ProjectSkeleton, undefined, string>[] }> {
   const client = getClient(opts.draft);
+  if (!client) return { items: [] };
   return client.getEntries<ProjectSkeleton>({
     content_type: "project",
     order: ["fields.order", "-fields.publishDate"],
@@ -140,6 +146,7 @@ export async function getAllProjects(opts: { draft?: boolean } = {}) {
 
 export async function getProjectBySlug(slug: string, opts: { draft?: boolean } = {}) {
   const client = getClient(opts.draft);
+  if (!client) return null;
   const entries = await client.getEntries<ProjectSkeleton>({
     content_type: "project",
     "fields.slug": slug,
@@ -148,8 +155,11 @@ export async function getProjectBySlug(slug: string, opts: { draft?: boolean } =
   return entries.items[0] ?? null;
 }
 
-export async function getAllBlogPosts(opts: { draft?: boolean } = {}) {
+export async function getAllBlogPosts(
+  opts: { draft?: boolean } = {},
+): Promise<{ items: Entry<BlogPostSkeleton, undefined, string>[] }> {
   const client = getClient(opts.draft);
+  if (!client) return { items: [] };
   return client.getEntries<BlogPostSkeleton>({
     content_type: "blogPost",
     order: ["-fields.publishDate"],
@@ -158,6 +168,7 @@ export async function getAllBlogPosts(opts: { draft?: boolean } = {}) {
 
 export async function getBlogPostBySlug(slug: string, opts: { draft?: boolean } = {}) {
   const client = getClient(opts.draft);
+  if (!client) return null;
   const entries = await client.getEntries<BlogPostSkeleton>({
     content_type: "blogPost",
     "fields.slug": slug,
@@ -166,8 +177,11 @@ export async function getBlogPostBySlug(slug: string, opts: { draft?: boolean } 
   return entries.items[0] ?? null;
 }
 
-export async function getFeaturedProjects(opts: { draft?: boolean; limit?: number } = {}) {
+export async function getFeaturedProjects(
+  opts: { draft?: boolean; limit?: number } = {},
+): Promise<{ items: Entry<ProjectSkeleton, undefined, string>[] }> {
   const client = getClient(opts.draft);
+  if (!client) return { items: [] };
   return client.getEntries<ProjectSkeleton>({
     content_type: "project",
     "fields.featured": true,
@@ -178,6 +192,7 @@ export async function getFeaturedProjects(opts: { draft?: boolean; limit?: numbe
 
 export async function getPrimaryAuthor(opts: { draft?: boolean } = {}) {
   const client = getClient(opts.draft);
+  if (!client) return null;
   const entries = await client.getEntries<AuthorSkeleton>({
     content_type: "author",
     limit: 1,
@@ -187,6 +202,7 @@ export async function getPrimaryAuthor(opts: { draft?: boolean } = {}) {
 
 export async function getSiteSettings(opts: { draft?: boolean } = {}) {
   const client = getClient(opts.draft);
+  if (!client) return null;
   const entries = await client.getEntries<SiteSettingsSkeleton>({
     content_type: "siteSettings",
     limit: 1,
