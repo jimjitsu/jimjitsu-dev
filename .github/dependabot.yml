@@ -19,3 +19,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      # Batch all GitHub Actions bumps into a single weekly PR instead of one
+      # PR per action.
+      github-actions:
+        patterns:
+          - "*"
