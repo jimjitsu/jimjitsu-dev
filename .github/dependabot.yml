@@ -6,14 +6,26 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     groups:
-      # Batch routine dev-dependency bumps into one PR to cut noise.
+      # Batch only safe (minor/patch) updates, split prod vs dev, so they arrive
+      # as at most two PRs. Majors are deliberately excluded from the groups (and
+      # ignored below) — they often need migration work and shouldn't ride along
+      # with routine bumps (this is what broke the earlier all-in-one dev group).
+      production-dependencies:
+        dependency-type: "production"
+        update-types: ["minor", "patch"]
       dev-dependencies:
         dependency-type: "development"
+        update-types: ["minor", "patch"]
     ignore:
       # Storybook 10's addon constraints are documented in CLAUDE.md; bump these
       # deliberately, not via automated PRs.
       - dependency-name: "storybook"
       - dependency-name: "@storybook/*"
+      # Don't auto-open major-version PRs — they need review/migration (e.g.
+      # Tailwind 3→4, TypeScript 5→7, ESLint 9→10). Remove this rule (or add a
+      # per-package exception) when you're ready to tackle a specific major.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -21,7 +33,7 @@ updates:
       interval: "weekly"
     groups:
       # Batch all GitHub Actions bumps into a single weekly PR instead of one
-      # PR per action.
+      # PR per action. Action majors are low-risk, so they're not ignored.
       github-actions:
         patterns:
           - "*"
