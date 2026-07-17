@@ -8,12 +8,12 @@ vi.mock("next/cache", () => ({
 
 const getAllProjects = vi.fn();
 const getAllBlogPosts = vi.fn();
-const getEntries = vi.fn();
+const getPrimaryAuthor = vi.fn();
 
 vi.mock("@/lib/contentful", () => ({
   getAllProjects: () => getAllProjects(),
   getAllBlogPosts: () => getAllBlogPosts(),
-  getClient: () => ({ getEntries: (args: unknown) => getEntries(args) }),
+  getPrimaryAuthor: () => getPrimaryAuthor(),
 }));
 
 const { getCareerContext } = await import("@/lib/chat-context");
@@ -40,7 +40,7 @@ describe("getCareerContext", () => {
     getAllBlogPosts.mockResolvedValue({
       items: [{ fields: { title: "On design systems", excerpt: "Notes", tags: ["css"] } }],
     });
-    getEntries.mockResolvedValue({ items: [{ fields: { bio: "Custom author bio." } }] });
+    getPrimaryAuthor.mockResolvedValue({ fields: { bio: "Custom author bio." } });
 
     const ctx = await getCareerContext();
 
@@ -54,7 +54,7 @@ describe("getCareerContext", () => {
   it("falls back to the static context when Contentful throws", async () => {
     getAllProjects.mockRejectedValue(new Error("Contentful unavailable"));
     getAllBlogPosts.mockResolvedValue({ items: [] });
-    getEntries.mockResolvedValue({ items: [] });
+    getPrimaryAuthor.mockResolvedValue(null);
 
     const ctx = await getCareerContext();
 
