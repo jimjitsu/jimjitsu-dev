@@ -1,7 +1,6 @@
 export const person = {
   name: "Jim Tierney",
   title: "Technical Team Lead · Senior Interface Developer",
-  phone: "480.246.0580",
   email: "jimbo.c.tierney@gmail.com",
   linkedin: "https://www.linkedin.com/in/jimbo-c-tierney/",
   summary:
