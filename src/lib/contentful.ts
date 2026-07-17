@@ -141,6 +141,7 @@ export async function getAllProjects(
   return client.getEntries<ProjectSkeleton>({
     content_type: "project",
     order: ["fields.order", "-fields.publishDate"],
+    limit: 1000, // Contentful's max page size; lifts the silent 100-entry default.
   });
 }
 
@@ -163,6 +164,7 @@ export async function getAllBlogPosts(
   return client.getEntries<BlogPostSkeleton>({
     content_type: "blogPost",
     order: ["-fields.publishDate"],
+    limit: 1000, // Contentful's max page size; lifts the silent 100-entry default.
   });
 }
 
