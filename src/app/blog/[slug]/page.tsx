@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 import { getAllBlogPosts, getBlogPostBySlug, resolveAssetUrl } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
@@ -54,7 +55,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const { isEnabled: draft } = await draftMode();
+  const post = await getBlogPostBySlug(slug, { draft });
   if (!post) notFound();
 
   const { title, excerpt, coverImage, body, tags, publishDate, author, canonicalUrl } = post.fields;

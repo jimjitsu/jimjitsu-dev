@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
 import { getAllProjects } from "@/lib/contentful";
 import { ProjectCard } from "@/components/project-card";
 import { StrikeIcon } from "@/components/icons";
@@ -16,7 +17,8 @@ export const metadata: Metadata = {
 const ACCENT_CYCLE = ["red", "teal", "amber"] as const;
 
 export default async function ProjectsIndexPage() {
-  const { items: projects } = await getAllProjects();
+  const { isEnabled: draft } = await draftMode();
+  const { items: projects } = await getAllProjects({ draft });
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-4xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">
