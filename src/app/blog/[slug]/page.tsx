@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/contentful";
+import { getAllBlogPosts, getBlogPostBySlug, resolveAssetUrl } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
 import { BackLink } from "@/components/back-link";
@@ -13,11 +12,6 @@ export const revalidate = 60;
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
-}
-
-function resolveContentfulUrl(url: string | undefined | null): string | undefined {
-  if (!url) return undefined;
-  return url.startsWith("//") ? `https:${url}` : url;
 }
 
 export async function generateStaticParams() {
@@ -34,13 +28,13 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
   const ogImageUrl =
     coverImage && "fields" in coverImage
-      ? resolveContentfulUrl(String(coverImage.fields.file?.url ?? ""))
+      ? resolveAssetUrl(String(coverImage.fields.file?.url ?? ""))
       : undefined;
 
   return {
     title,
     description: excerpt,
-    ...(canonicalUrl && { alternates: { canonical: canonicalUrl } }),
+    alternates: { canonical: canonicalUrl ?? `/blog/${slug}` },
     openGraph: {
       title,
       description: excerpt,
@@ -63,8 +57,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
 
-  const { title, excerpt, coverImage, body, tags, publishDate, author, canonicalUrl } =
-    post.fields;
+  const { title, excerpt, coverImage, body, tags, publishDate, author, canonicalUrl } = post.fields;
   const authorName =
     author && "fields" in author ? (author.fields.name as string | undefined) : undefined;
 
@@ -103,9 +96,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <header className="flex flex-col gap-4">
         <p className="eyebrow">Post</p>
         <h1 className="display-heading">{title}</h1>
-        {excerpt && (
-          <p className="max-w-2xl text-base leading-relaxed text-ink-muted">{excerpt}</p>
-        )}
+        {excerpt && <p className="max-w-2xl text-base leading-relaxed text-ink-muted">{excerpt}</p>}
         <ArticleMetaLine publishDate={publishDate} author={authorName} tags={tags ?? undefined} />
       </header>
 

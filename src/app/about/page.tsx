@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
-import { contentful, type AuthorSkeleton } from "@/lib/contentful";
+import { getPrimaryAuthor } from "@/lib/contentful";
 import { BowlingPinIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
 import { JsonLd } from "@/components/json-ld";
@@ -12,20 +12,8 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "About",
   description: "About Jim Tierney — frontend engineer, Milwaukee.",
-  openGraph: {
-    title: "About Jim Tierney",
-    description: "About Jim Tierney — frontend engineer, Milwaukee.",
-    url: `${SITE_URL}/about`,
-  },
+  alternates: { canonical: "/about" },
 };
-
-async function getPrimaryAuthor() {
-  const entries = await contentful.getEntries<AuthorSkeleton>({
-    content_type: "author",
-    limit: 1,
-  });
-  return entries.items[0] ?? null;
-}
 
 export default async function AboutPage() {
   const author = await getPrimaryAuthor();

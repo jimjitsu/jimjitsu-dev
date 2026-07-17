@@ -119,8 +119,16 @@ export function getClient(draft = false): ContentfulClientApi<undefined> {
 
 /* -------------------------------------------------------------------------- */
 /* Helpers — thin wrappers for the most common fetches.                      */
-/* These will be expanded in step 3 when we wire pages to Contentful.        */
 /* -------------------------------------------------------------------------- */
+
+/**
+ * Contentful asset URLs are protocol-relative (`//images.ctfassets.net/...`).
+ * Normalize to https so they work in metadata, RSS, and next/image.
+ */
+export function resolveAssetUrl(url: string | undefined | null): string | undefined {
+  if (!url) return undefined;
+  return url.startsWith("//") ? `https:${url}` : url;
+}
 
 export async function getAllProjects(opts: { draft?: boolean } = {}) {
   const client = getClient(opts.draft);
@@ -153,6 +161,25 @@ export async function getBlogPostBySlug(slug: string, opts: { draft?: boolean } 
   const entries = await client.getEntries<BlogPostSkeleton>({
     content_type: "blogPost",
     "fields.slug": slug,
+    limit: 1,
+  });
+  return entries.items[0] ?? null;
+}
+
+export async function getFeaturedProjects(opts: { draft?: boolean; limit?: number } = {}) {
+  const client = getClient(opts.draft);
+  return client.getEntries<ProjectSkeleton>({
+    content_type: "project",
+    "fields.featured": true,
+    order: ["fields.order", "-fields.publishDate"],
+    limit: opts.limit ?? 4,
+  });
+}
+
+export async function getPrimaryAuthor(opts: { draft?: boolean } = {}) {
+  const client = getClient(opts.draft);
+  const entries = await client.getEntries<AuthorSkeleton>({
+    content_type: "author",
     limit: 1,
   });
   return entries.items[0] ?? null;

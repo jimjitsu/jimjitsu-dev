@@ -55,7 +55,7 @@ function JimbotBubble({ text, showLabel = true }: { text: string; showLabel?: bo
   return (
     <div className="flex flex-col gap-1">
       {showLabel && <p className="eyebrow-sm text-ink-muted">Jimbo-t</p>}
-      <div className="border-2 border-ink border-l-4 border-l-amber bg-base px-3 py-2 font-mono text-sm text-ink">
+      <div className="border-2 border-l-4 border-ink border-l-amber bg-base px-3 py-2 font-mono text-sm text-ink">
         {text}
       </div>
     </div>
@@ -75,7 +75,7 @@ function StrangerBubble({ text }: { text: string }) {
       className={`flex flex-col gap-1 transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0"}`}
     >
       <p className="eyebrow-sm text-teal">The Stranger</p>
-      <div className="border-2 border-dashed border-ink border-l-4 border-l-teal bg-surface px-3 py-2 font-mono text-sm text-ink">
+      <div className="border-2 border-l-4 border-dashed border-ink border-l-teal bg-surface px-3 py-2 font-mono text-sm text-ink">
         {text}
       </div>
     </div>
@@ -85,8 +85,11 @@ function StrangerBubble({ text }: { text: string }) {
 function LoadingBubble() {
   return (
     <div className="flex flex-col gap-1">
-      <p className="eyebrow-sm text-ink-muted">Jimbo-t</p>
-      <div className="border-2 border-ink border-l-4 border-l-amber bg-base px-3 py-2">
+      <p className="sr-only">Jimbo-t is typing</p>
+      <p className="eyebrow-sm text-ink-muted" aria-hidden="true">
+        Jimbo-t
+      </p>
+      <div className="border-2 border-l-4 border-ink border-l-amber bg-base px-3 py-2">
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-1.5 w-1.5 animate-pulse bg-ink-muted"
@@ -109,12 +112,7 @@ function LoadingBubble() {
 function CloseIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-      <path
-        d="M6 6l12 12M18 6L6 18"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -132,21 +130,43 @@ export function ChatWidget() {
 
   const panelRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
   // history is kept in a ref to avoid stale closure issues in sendMessage
   const historyRef = useRef<ChatTurn[]>([]);
+  // Pending Stranger reveal — tracked so a rapid next send can flush it in
+  // order instead of letting it land after the user's next message.
+  const strangerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingStrangerRef = useRef<string | null>(null);
+  const wasOpenRef = useRef(false);
 
   // Auto-scroll on new messages or loading state change
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // Focus textarea when panel opens
+  // Focus textarea when the panel opens and again when it re-enables after a
+  // send (disabled={loading} ejects focus, stranding keyboard users).
   useEffect(() => {
-    if (open) {
+    if (open && !loading) {
       textareaRef.current?.focus();
     }
+  }, [open, loading]);
+
+  // Return focus to the trigger button when the panel closes.
+  useEffect(() => {
+    if (wasOpenRef.current && !open) {
+      triggerRef.current?.focus();
+    }
+    wasOpenRef.current = open;
   }, [open]);
+
+  // Clear any pending Stranger reveal on unmount.
+  useEffect(() => {
+    return () => {
+      if (strangerTimerRef.current) clearTimeout(strangerTimerRef.current);
+    };
+  }, []);
 
   // Body scroll lock while open (mobile UX)
   useEffect(() => {
@@ -158,19 +178,11 @@ export function ChatWidget() {
     };
   }, [open]);
 
-  // Focus trap + Escape key
+  // Focus trap + Escape key. Focusables are recomputed per keydown because the
+  // panel's DOM changes while open (chips unmount, buttons toggle disabled) —
+  // a list captured at open time goes stale and lets focus escape.
   useEffect(() => {
     if (!open) return;
-    const panel = panelRef.current;
-    if (!panel) return;
-
-    const focusable = Array.from(
-      panel.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-      ),
-    );
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -178,15 +190,27 @@ export function ChatWidget() {
         return;
       }
       if (e.key !== "Tab") return;
+
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
       if (e.shiftKey) {
         if (document.activeElement === first) {
           e.preventDefault();
-          last?.focus();
+          last.focus();
         }
       } else {
         if (document.activeElement === last) {
           e.preventDefault();
-          first?.focus();
+          first.focus();
         }
       }
     };
@@ -199,6 +223,21 @@ export function ChatWidget() {
     async (text: string) => {
       const trimmed = text.trim().slice(0, 500);
       if (!trimmed || loading) return;
+
+      // If a Stranger reveal is still pending from the last exchange, flush it
+      // now so it lands before the new user message instead of after it.
+      if (strangerTimerRef.current) {
+        clearTimeout(strangerTimerRef.current);
+        strangerTimerRef.current = null;
+      }
+      if (pendingStrangerRef.current) {
+        const pendingText = pendingStrangerRef.current;
+        pendingStrangerRef.current = null;
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: "stranger", text: pendingText },
+        ]);
+      }
 
       setInput("");
       setHasUserMessage(true);
@@ -218,19 +257,22 @@ export function ChatWidget() {
 
       const history = [...historyRef.current];
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20_000);
+
       try {
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: trimmed, history }),
+          signal: controller.signal,
         });
 
         const data = (await res.json()) as ApiResponse;
 
         if (!res.ok || !data.jimbot) {
           const errText =
-            data.error ??
-            "Life does not stop and start at your convenience — try again, man.";
+            data.error ?? "Life does not stop and start at your convenience — try again, man.";
           setMessages((prev) => [
             ...prev,
             { id: crypto.randomUUID(), role: "jimbot", text: errText },
@@ -242,10 +284,9 @@ export function ChatWidget() {
           ]);
 
           // Update conversation history for next request
-          const assistantContent =
-            data.stranger?.text
-              ? `[Jimbo-t]: ${data.jimbot.text}\n[The Stranger]: ${data.stranger.text}`
-              : `[Jimbo-t]: ${data.jimbot.text}`;
+          const assistantContent = data.stranger?.text
+            ? `[Jimbo-t]: ${data.jimbot.text}\n[The Stranger]: ${data.stranger.text}`
+            : `[Jimbo-t]: ${data.jimbot.text}`;
 
           historyRef.current = [
             ...historyRef.current,
@@ -253,10 +294,14 @@ export function ChatWidget() {
             { role: "assistant" as const, content: assistantContent },
           ].slice(-20); // keep last 10 exchanges (20 turns)
 
-          // Delayed Stranger reveal
+          // Delayed Stranger reveal — tracked in refs so the next send can
+          // cancel the timer and flush the text in order.
           if (data.jimbot.triggered_stranger && data.stranger?.text) {
             const strangerText = data.stranger.text;
-            setTimeout(() => {
+            pendingStrangerRef.current = strangerText;
+            strangerTimerRef.current = setTimeout(() => {
+              strangerTimerRef.current = null;
+              pendingStrangerRef.current = null;
               setMessages((prev) => [
                 ...prev,
                 { id: crypto.randomUUID(), role: "stranger", text: strangerText },
@@ -264,16 +309,20 @@ export function ChatWidget() {
             }, 800);
           }
         }
-      } catch {
+      } catch (err) {
+        const timedOut = err instanceof DOMException && err.name === "AbortError";
         setMessages((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
             role: "jimbot",
-            text: "Look, something went wrong. Life does not stop and start at your convenience — just try again, man.",
+            text: timedOut
+              ? "That one took too long, man. This is a very complicated case — lotta ins, lotta outs. Try again."
+              : "Look, something went wrong. Life does not stop and start at your convenience — just try again, man.",
           },
         ]);
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     },
@@ -306,6 +355,7 @@ export function ChatWidget() {
       {/* Trigger button — hidden when panel is open */}
       {!open && (
         <button
+          ref={triggerRef}
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open chat with Jimbo-t"
@@ -315,12 +365,13 @@ export function ChatWidget() {
         </button>
       )}
 
-      {/* Backdrop — always rendered so opacity transition works */}
+      {/* Backdrop — always rendered so the opacity transition works. Hidden
+          from AT: Escape and the close button are the accessible affordances. */}
       <button
         type="button"
         onClick={() => setOpen(false)}
-        aria-label="Dismiss"
-        tabIndex={open ? 0 : -1}
+        aria-hidden="true"
+        tabIndex={-1}
         className={`fixed inset-0 z-30 bg-ink/20 transition-opacity ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -333,7 +384,7 @@ export function ChatWidget() {
           role="dialog"
           aria-label="Chat with Jimbo-t"
           aria-modal="true"
-          className="fixed inset-x-0 bottom-0 z-40 flex max-h-[80dvh] flex-col border-t-2 border-ink bg-base lg:inset-x-auto lg:bottom-24 lg:right-8 lg:w-[380px] lg:max-w-[calc(100vw-2rem)] lg:max-h-[520px] lg:border-2 lg:shadow-[4px_4px_0_0_rgb(var(--color-ink))]"
+          className="fixed inset-x-0 bottom-0 z-40 flex max-h-[80dvh] flex-col border-t-2 border-ink bg-base lg:inset-x-auto lg:bottom-24 lg:right-8 lg:max-h-[520px] lg:w-[380px] lg:max-w-[calc(100vw-2rem)] lg:border-2 lg:shadow-[4px_4px_0_0_rgb(var(--color-ink))]"
         >
           {/* Amber accent bar */}
           <div className="h-2 flex-shrink-0 bg-amber" />
@@ -385,8 +436,7 @@ export function ChatWidget() {
             {/* Message history */}
             {messages.map((msg) => {
               if (msg.role === "user") return <UserBubble key={msg.id} text={msg.text} />;
-              if (msg.role === "stranger")
-                return <StrangerBubble key={msg.id} text={msg.text} />;
+              if (msg.role === "stranger") return <StrangerBubble key={msg.id} text={msg.text} />;
               return <JimbotBubble key={msg.id} text={msg.text} />;
             })}
 

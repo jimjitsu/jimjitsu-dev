@@ -50,6 +50,14 @@ function checkRateLimit(ip: string): boolean {
   const limit = 20;
   const windowMs = 60_000;
 
+  // Evict expired entries once the map grows, so it doesn't accumulate
+  // one entry per unique IP for the lifetime of the instance.
+  if (rateLimitMap.size > 500) {
+    for (const [key, value] of rateLimitMap) {
+      if (value.resetAt <= now) rateLimitMap.delete(key);
+    }
+  }
+
   const entry = rateLimitMap.get(ip);
   if (!entry || entry.resetAt <= now) {
     rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
@@ -67,17 +75,26 @@ function checkRateLimit(ip: string): boolean {
 const LLM_ERROR =
   "Look, something went wrong. Life does not stop and start at your convenience — just try again, man.";
 
-export async function POST(
-  req: NextRequest,
-): Promise<NextResponse<ChatResponse | ChatError>> {
+// Bound the upstream call so a hung OpenRouter request can't pin the function
+// (and the widget's spinner) until the platform kills it.
+const UPSTREAM_TIMEOUT_MS = 15_000;
+export const maxDuration = 30;
+
+// History caps: 20 turns = 10 user/assistant exchanges (matches the client's
+// window). Per-turn content is truncated, not rejected — assistant turns
+// legitimately run long, and an oversized turn shouldn't fail the request.
+// Without this cap, attacker-controlled history is an unbounded token-spend
+// vector (the 500-char limit only covers `message`).
+const MAX_HISTORY_TURNS = 20;
+const MAX_TURN_CHARS = 2_000;
+
+export async function POST(req: NextRequest): Promise<NextResponse<ChatResponse | ChatError>> {
   // Rate limit
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (!checkRateLimit(ip)) {
     return NextResponse.json(
       {
-        error:
-          "This aggression will not stand, man. Twenty requests per minute — that's the rule.",
+        error: "This aggression will not stand, man. Twenty requests per minute — that's the rule.",
         code: "rate_limited",
       },
       { status: 429 },
@@ -124,18 +141,22 @@ export async function POST(
     );
   }
 
-  // Sanitize: strip HTML tags, hard-truncate
-  const sanitizedMessage = message.replace(/<[^>]*>/g, "").trim().slice(0, 500);
+  // The message renders as plain text client-side and goes to the LLM as data,
+  // so no HTML stripping — it would only mangle legit questions about markup.
+  const sanitizedMessage = message.trim().slice(0, 500);
 
-  // Cap history at 10 turns (drop oldest)
+  // Validate shape first, then cap turn count (drop oldest) and turn length.
   const rawHistory = Array.isArray(history) ? history : [];
-  const cappedHistory = (rawHistory as ChatTurn[]).slice(-10).filter(
-    (t) =>
-      t &&
-      typeof t === "object" &&
-      (t.role === "user" || t.role === "assistant") &&
-      typeof t.content === "string",
-  );
+  const cappedHistory = (rawHistory as ChatTurn[])
+    .filter(
+      (t) =>
+        t &&
+        typeof t === "object" &&
+        (t.role === "user" || t.role === "assistant") &&
+        typeof t.content === "string",
+    )
+    .slice(-MAX_HISTORY_TURNS)
+    .map((t) => ({ role: t.role, content: t.content.slice(0, MAX_TURN_CHARS) }));
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -172,6 +193,7 @@ export async function POST(
         max_tokens: 600,
         response_format: { type: "json_object" },
       }),
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -211,6 +233,10 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (err) {
+    if (err instanceof DOMException && err.name === "TimeoutError") {
+      console.error("OpenRouter request timed out after", UPSTREAM_TIMEOUT_MS, "ms");
+      return NextResponse.json({ error: LLM_ERROR, code: "llm_error" }, { status: 504 });
+    }
     console.error("Chat route error:", err);
     return NextResponse.json({ error: LLM_ERROR, code: "llm_error" }, { status: 500 });
   }

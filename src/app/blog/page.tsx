@@ -9,6 +9,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Blog",
   description: "Writing by Jim Tierney on frontend, design systems, and adjacent territory.",
+  alternates: { canonical: "/blog" },
 };
 
 export default async function BlogIndexPage() {

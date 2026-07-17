@@ -1,5 +1,6 @@
 import Image, { type ImageProps } from "next/image";
 import type { Asset } from "contentful";
+import { resolveAssetUrl } from "@/lib/contentful";
 
 type ContentfulImageProps = Omit<ImageProps, "src" | "width" | "height" | "alt"> & {
   /** A resolved Contentful Asset (call .resolveLink or use included assets). */
@@ -20,8 +21,7 @@ export function ContentfulImage({ asset, alt, width, height, ...rest }: Contentf
   if (!asset?.fields?.file) return null;
 
   const file = asset.fields.file;
-  const rawUrl = typeof file.url === "string" ? file.url : "";
-  const url = rawUrl.startsWith("//") ? `https:${rawUrl}` : rawUrl;
+  const url = resolveAssetUrl(typeof file.url === "string" ? file.url : "");
 
   if (!url) return null;
 
@@ -32,9 +32,7 @@ export function ContentfulImage({ asset, alt, width, height, ...rest }: Contentf
   }
 
   const imageDetails =
-    file.details && "image" in file.details && file.details.image
-      ? file.details.image
-      : undefined;
+    file.details && "image" in file.details && file.details.image ? file.details.image : undefined;
 
   const finalWidth = width ?? imageDetails?.width ?? 1200;
   const finalHeight = height ?? imageDetails?.height ?? 800;

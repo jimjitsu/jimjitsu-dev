@@ -4,6 +4,8 @@ interface SectionHeaderProps {
   eyebrow: string;
   icon?: React.ReactNode;
   title: string;
+  /** Rendered on the h2 so parent sections can reference it via aria-labelledby. */
+  id?: string;
   seeAllHref?: string;
   seeAllLabel?: string;
 }
@@ -12,6 +14,7 @@ export function SectionHeader({
   eyebrow,
   icon,
   title,
+  id,
   seeAllHref,
   seeAllLabel,
 }: SectionHeaderProps) {
@@ -22,7 +25,9 @@ export function SectionHeader({
           {icon}
           {eyebrow}
         </p>
-        <h2 className="display-heading">{title}</h2>
+        <h2 id={id} className="display-heading">
+          {title}
+        </h2>
       </div>
       {seeAllHref && seeAllLabel && (
         <Link
