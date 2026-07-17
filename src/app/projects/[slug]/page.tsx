@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getAllProjects, getProjectBySlug } from "@/lib/contentful";
+import { getAllProjects, getProjectBySlug, resolveAssetUrl } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
 import { BackLink } from "@/components/back-link";
@@ -13,11 +12,6 @@ export const revalidate = 60;
 
 interface ProjectPageProps {
   params: Promise<{ slug: string }>;
-}
-
-function resolveContentfulUrl(url: string | undefined | null): string | undefined {
-  if (!url) return undefined;
-  return url.startsWith("//") ? `https:${url}` : url;
 }
 
 export async function generateStaticParams() {
@@ -34,12 +28,13 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
   const ogImageUrl =
     coverImage && "fields" in coverImage
-      ? resolveContentfulUrl(String(coverImage.fields.file?.url ?? ""))
+      ? resolveAssetUrl(String(coverImage.fields.file?.url ?? ""))
       : undefined;
 
   return {
     title,
     description: summary,
+    alternates: { canonical: `/projects/${slug}` },
     openGraph: {
       title,
       description: summary,
@@ -61,8 +56,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const project = await getProjectBySlug(slug);
   if (!project) notFound();
 
-  const { title, summary, coverImage, role, technologies, liveUrl, repoUrl, body } =
-    project.fields;
+  const { title, summary, coverImage, role, technologies, liveUrl, repoUrl, body } = project.fields;
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -83,9 +77,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       <header className="flex flex-col gap-4">
         <p className="eyebrow">Case study</p>
         <h1 className="display-heading">{title}</h1>
-        {summary && (
-          <p className="max-w-2xl text-base leading-relaxed text-ink-muted">{summary}</p>
-        )}
+        {summary && <p className="max-w-2xl text-base leading-relaxed text-ink-muted">{summary}</p>}
       </header>
 
       {coverImage && "fields" in coverImage && (

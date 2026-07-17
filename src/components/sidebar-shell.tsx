@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 interface SidebarShellProps {
@@ -18,8 +18,17 @@ export function SidebarShell({ children }: SidebarShellProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const sidebarRef = useRef<HTMLElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  // Explicit close (Escape / backdrop / X): return focus to the hamburger so
+  // keyboard users aren't stranded inside the now-hidden drawer.
+  const close = useCallback(() => {
+    setOpen(false);
+    hamburgerRef.current?.focus();
+  }, []);
 
   // Auto-close on route change so navigation feels responsive on mobile.
+  // No focus restore here — navigation already moves focus to the new page.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(false);
@@ -54,7 +63,7 @@ export function SidebarShell({ children }: SidebarShellProps) {
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setOpen(false);
+        close();
         return;
       }
       if (e.key !== "Tab") return;
@@ -73,12 +82,13 @@ export function SidebarShell({ children }: SidebarShellProps) {
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [open, close]);
 
   return (
     <>
       {/* Hamburger — mobile only, fixed top-right. */}
       <button
+        ref={hamburgerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
@@ -89,23 +99,27 @@ export function SidebarShell({ children }: SidebarShellProps) {
         <HamburgerIcon />
       </button>
 
-      {/* Backdrop — mobile only, dismissable. */}
+      {/* Backdrop — mobile only, click-away dismiss. Hidden from AT: Escape
+          and the X button are the accessible close affordances. */}
       <button
         type="button"
-        onClick={() => setOpen(false)}
-        aria-label="Close menu"
-        tabIndex={open ? 0 : -1}
+        onClick={close}
+        aria-hidden="true"
+        tabIndex={-1}
         className={`fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm transition-opacity lg:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
+      {/* `invisible` when closed removes the off-screen drawer from the tab
+          order and accessibility tree on mobile; visibility transitions
+          discretely, so the slide-out animation still plays. */}
       <aside
         id="site-sidebar"
         ref={sidebarRef}
         aria-label="Site navigation"
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-y-auto border-r-2 border-ink bg-white transition-transform duration-200 ease-out dark:bg-black lg:translate-x-0 ${
-          open ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-y-auto border-r-2 border-ink bg-white transition-[transform,visibility] duration-200 ease-out lg:visible lg:translate-x-0 dark:bg-black ${
+          open ? "visible translate-x-0" : "invisible -translate-x-full"
         }`}
       >
         {/* Mobile-only close affordance (the X). Sits above the full-bleed
@@ -113,7 +127,7 @@ export function SidebarShell({ children }: SidebarShellProps) {
             contrast against the dark logo art. */}
         <button
           type="button"
-          onClick={() => setOpen(false)}
+          onClick={close}
           aria-label="Close menu"
           className="absolute right-3 top-3 inline-flex items-center justify-center rounded-full border-2 border-neutral-900 bg-white p-1.5 text-neutral-900 lg:hidden"
         >
@@ -128,7 +142,12 @@ export function SidebarShell({ children }: SidebarShellProps) {
 function HamburgerIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-      <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M4 6h16M4 12h16M4 18h16"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

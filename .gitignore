@@ -38,3 +38,8 @@ Thumbs.db
 
 # Storybook
 storybook-static/
+debug-storybook.log
+
+# Playwright
+playwright-report/
+test-results/

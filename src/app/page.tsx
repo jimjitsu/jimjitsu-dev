@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { contentful, getAllBlogPosts, getSiteSettings, type AuthorSkeleton, type ProjectSkeleton, type SkillGroup } from "@/lib/contentful";
-import { CONTACT_EMAIL } from "@/lib/constants";
+import {
+  getAllBlogPosts,
+  getFeaturedProjects,
+  getPrimaryAuthor,
+  getSiteSettings,
+  type SkillGroup,
+} from "@/lib/contentful";
+import { CONTACT_EMAIL, SITE_URL } from "@/lib/constants";
+import { JsonLd } from "@/components/json-ld";
 import { ProjectCard } from "@/components/project-card";
 import { BlogPostCard } from "@/components/blog-post-card";
 import { SectionHeader } from "@/components/section-header";
@@ -14,6 +22,10 @@ import {
 } from "@/components/icons";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const FALLBACK_HERO_TITLE = "Frontend developer";
 
@@ -44,24 +56,43 @@ const FALLBACK_ATTRIBUTES: string[] = [
  * Inner content centers via mx-auto + max-w-* (spec §6.2).
  */
 export default async function HomePage() {
-  const [{ items: featuredProjects }, { items: recentPosts }, { items: authors }, settings] =
-    await Promise.all([
-      contentful.getEntries<ProjectSkeleton>({
-        content_type: "project",
-        "fields.featured": true,
-        order: ["fields.order", "-fields.publishDate"],
-        limit: 4,
-      }),
+  const [{ items: featuredProjects }, { items: recentPosts }, author, settings] = await Promise.all(
+    [
+      getFeaturedProjects(),
       getAllBlogPosts().then((res) => ({ items: res.items.slice(0, 3) })),
-      contentful.getEntries<AuthorSkeleton>({ content_type: "author", limit: 1 }),
+      getPrimaryAuthor(),
       getSiteSettings(),
-    ]);
+    ],
+  );
 
   // Use the first paragraph of the author bio as the home snapshot blurb.
-  const bioSnippet = authors[0]?.fields.bio?.split(/\n\n/)[0] ?? null;
+  const bioSnippet = author?.fields.bio?.split(/\n\n/)[0] ?? null;
+
+  const socialLinks = author?.fields.socialLinks
+    ? Object.values(author.fields.socialLinks as Record<string, string>)
+    : [];
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Jim Tierney — Frontend Engineer",
+    url: SITE_URL,
+  };
+
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: author?.fields.name ?? "Jim Tierney",
+    url: SITE_URL,
+    email: CONTACT_EMAIL,
+    jobTitle: "Frontend Engineer",
+    ...(socialLinks.length > 0 && { sameAs: socialLinks }),
+  };
 
   return (
     <main>
+      <JsonLd schema={websiteSchema} />
+      <JsonLd schema={personSchema} />
       <Section bg="base">
         <HeroSection
           title={settings?.fields.heroTitle ?? FALLBACK_HERO_TITLE}
@@ -102,9 +133,9 @@ export default async function HomePage() {
 function Section({ children, bg }: { children: React.ReactNode; bg: "base" | "surface" }) {
   const bgClass = bg === "surface" ? "bg-surface" : "bg-base";
   return (
-    <section className={`${bgClass} border-b-2 border-ink/10 last:border-b-0`}>
+    <div className={`${bgClass} border-b-2 border-ink/10 last:border-b-0`}>
       <div className="mx-auto max-w-4xl px-6 py-20 sm:px-10 sm:py-24">{children}</div>
-    </section>
+    </div>
   );
 }
 
@@ -124,9 +155,7 @@ function HeroSection({ title, bio }: { title: string; bio: string }) {
       <h1 id="hero-heading" className="display-heading">
         {title}
       </h1>
-      <p className="max-w-2xl text-base leading-relaxed text-ink-muted">
-        {bio}
-      </p>
+      <p className="max-w-2xl text-base leading-relaxed text-ink-muted">{bio}</p>
       <div className="flex flex-wrap gap-4">
         <Link href="/projects" className="btn-primary">
           See projects
@@ -175,11 +204,12 @@ function AboutSnapshotSection({ bio }: { bio: string | null }) {
 function FeaturedProjectsSection({
   projects,
 }: {
-  projects: Awaited<ReturnType<typeof contentful.getEntries<ProjectSkeleton>>>["items"];
+  projects: Awaited<ReturnType<typeof getFeaturedProjects>>["items"];
 }) {
   return (
     <section aria-labelledby="projects-heading" className="flex flex-col gap-6">
       <SectionHeader
+        id="projects-heading"
         eyebrow="Selected work"
         icon={<StrikeIcon size={16} className="text-red" />}
         title="Featured projects."
@@ -211,6 +241,7 @@ function RecentWritingSection({
   return (
     <section aria-labelledby="writing-heading" className="flex flex-col gap-6">
       <SectionHeader
+        id="writing-heading"
         eyebrow="From the blog"
         icon={<BowlingPinIcon size={16} className="text-amber" />}
         title="Recent writing."

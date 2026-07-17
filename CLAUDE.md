@@ -24,11 +24,13 @@ node scripts/run-migration.cjs migrations/<file>.cjs   # run any migration direc
 ```
 
 **Testing layout:**
+
 - Unit tests live in `src/__tests__/` and match `**/*.test.ts`. Run with `pnpm test`.
 - E2e tests live in `e2e/` and match `**/*.spec.ts`. Run with `pnpm test:e2e`.
 - Playwright starts `pnpm dev` automatically; it reuses an already-running server in local dev.
 
 **Storybook layout:**
+
 - Stories live in `src/stories/` and match `**/*.stories.tsx`. Run with `pnpm storybook`.
 - Contentful mock factories are in `src/stories/mocks/contentful.ts`.
 - Story types (`Meta`, `StoryObj`, `Decorator`) come from `@storybook/react`, not `@storybook/nextjs`.
@@ -64,7 +66,7 @@ Every dynamic route (`/blog/[slug]`, `/projects/[slug]`) exports `generateStatic
 
 `src/components/MarkdownContent` is an **async server component** that runs the full unified pipeline: `remark-parse → remark-gfm → remark-rehype → rehype-pretty-code → rehype-stringify`. It outputs HTML via `dangerouslySetInnerHTML`.
 
-`rehype-pretty-code` is async (Shiki loads grammars lazily), which is why `react-markdown`'s synchronous `runSync` cannot be used — even though `react-markdown` is still listed as a dependency.
+`rehype-pretty-code` is async (Shiki loads grammars lazily), which is why `react-markdown`'s synchronous `runSync` could not be used (`react-markdown` has since been removed from the dependencies).
 
 ### Design system
 
@@ -82,13 +84,15 @@ Migration files live in `migrations/` and are plain CommonJS (`*.cjs`). The runn
 
 A floating chat widget mounted in `layout.tsx`. Full spec: `docs/spec-digital-twin-chatbot.md`.
 
-**Persona:** Jimbo-t is Jim's **digital twin / hype-man**, not Jim himself — it speaks *about* Jim in the third person ("Jim built that") while keeping the Dude/Walter voice. The quote pool in `chat-prompts.ts` is data-driven over three groups read from the JSON: voice characters (Dude + Walter), a curated supporting cast (occasional riffs; `EXCLUDED_QUOTES` denylist drops off-brand lines), and The Stranger (trigger detection only).
+**Persona:** Jimbo-t is Jim's **digital twin / hype-man**, not Jim himself — it speaks _about_ Jim in the third person ("Jim built that") while keeping the Dude/Walter voice. The quote pool in `chat-prompts.ts` is data-driven over three groups read from the JSON: voice characters (Dude + Walter), a curated supporting cast (occasional riffs; `EXCLUDED_QUOTES` denylist drops off-brand lines), and The Stranger (trigger detection only).
 
 **New env vars** (add to `.env.local` and Vercel dashboard):
+
 - `OPENROUTER_API_KEY` — server-side only, never expose to the browser
 - `OPENROUTER_MODEL` — optional; defaults to `google/gemini-2.5-flash`
 
 **Key files:**
+
 - `src/app/api/chat/route.ts` — `POST /api/chat`; validates request, calls OpenRouter, returns `{ jimbot, stranger? }` JSON
 - `src/lib/chat-context.ts` — assembles career context string from Contentful; wrapped in `unstable_cache` at 60s revalidation. Called at request time only — never at module init.
 - `src/lib/chat-prompts.ts` — `buildSystemPrompt(careerContext)` assembles the 6-section system prompt; imports quote library from `src/data/big_lebowski_quotes.json`

@@ -9,6 +9,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Projects",
   description: "Selected projects and case studies by Jim Tierney.",
+  alternates: { canonical: "/projects" },
 };
 
 // Rotates through the three accent colors so the grid has a bowling-stripe rhythm.
