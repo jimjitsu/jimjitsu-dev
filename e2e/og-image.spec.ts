@@ -15,7 +15,11 @@ test.describe("Dynamic OG images", () => {
     const ogImage = await page.locator('meta[property="og:image"]').getAttribute("content");
     expect(ogImage).toContain("/opengraph-image");
 
-    const res = await request.get(ogImage!);
+    // The meta URL is absolute against metadataBase (the production domain in a
+    // prod build). Fetch just the path so it resolves against the server under
+    // test, not the live site.
+    const { pathname, search } = new URL(ogImage!);
+    const res = await request.get(pathname + search);
     expect(res.status()).toBe(200);
     expect(res.headers()["content-type"]).toContain("image/png");
   });
