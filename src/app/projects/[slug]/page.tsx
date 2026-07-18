@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
-import { getAllProjects, getProjectBySlug, resolveAssetUrl } from "@/lib/contentful";
+import { getAllProjects, getProjectBySlug } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
 import { BackLink } from "@/components/back-link";
@@ -25,13 +25,9 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   const project = await getProjectBySlug(slug);
   if (!project) return {};
 
-  const { title, summary, coverImage } = project.fields;
+  const { title, summary } = project.fields;
 
-  const ogImageUrl =
-    coverImage && "fields" in coverImage
-      ? resolveAssetUrl(String(coverImage.fields.file?.url ?? ""))
-      : undefined;
-
+  // The og:image comes from the generated card in opengraph-image.tsx.
   return {
     title,
     description: summary,
@@ -41,13 +37,11 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
       description: summary,
       type: "website",
       url: `${SITE_URL}/projects/${slug}`,
-      ...(ogImageUrl && { images: [{ url: ogImageUrl }] }),
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: summary,
-      ...(ogImageUrl && { images: [ogImageUrl] }),
     },
   };
 }
