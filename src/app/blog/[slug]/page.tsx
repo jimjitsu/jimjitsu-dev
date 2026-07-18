@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
-import { getAllBlogPosts, getBlogPostBySlug, resolveAssetUrl } from "@/lib/contentful";
+import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/contentful";
 import { ContentfulImage } from "@/components/contentful-image";
 import { MarkdownContent } from "@/components/markdown-content";
 import { BackLink } from "@/components/back-link";
@@ -25,13 +25,9 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const post = await getBlogPostBySlug(slug);
   if (!post) return {};
 
-  const { title, excerpt, coverImage, publishDate, canonicalUrl } = post.fields;
+  const { title, excerpt, publishDate, canonicalUrl } = post.fields;
 
-  const ogImageUrl =
-    coverImage && "fields" in coverImage
-      ? resolveAssetUrl(String(coverImage.fields.file?.url ?? ""))
-      : undefined;
-
+  // The og:image comes from the generated card in opengraph-image.tsx.
   return {
     title,
     description: excerpt,
@@ -42,13 +38,11 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       type: "article",
       publishedTime: publishDate,
       url: `${SITE_URL}/blog/${slug}`,
-      ...(ogImageUrl && { images: [{ url: ogImageUrl }] }),
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: excerpt,
-      ...(ogImageUrl && { images: [ogImageUrl] }),
     },
   };
 }
