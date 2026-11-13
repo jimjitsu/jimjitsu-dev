@@ -27,15 +27,15 @@
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
-    "contentful": "^11.12.7",
-    "next": "16.2.12",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "contentful": "^11.12.10",
+    "next": "16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "rehype-pretty-code": "^0.14.5",
     "remark-gfm": "^4.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.3.1"
+    "shiki": "^4.4.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
@@ -45,8 +45,8 @@
     "@storybook/nextjs": "^10.4.0",
     "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^22.20.1",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.5.4",
     "contentful-cli": "^3.5.0",
